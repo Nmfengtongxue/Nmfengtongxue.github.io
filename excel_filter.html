@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel动态关键词筛选分析工具</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .upload-section {
+            padding: 40px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .upload-area {
+            border: 3px dashed #6a11cb;
+            border-radius: 10px;
+            padding: 50px 20px;
+            text-align: center;
+            background-color: #f9f7ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background-color: #f0ebff;
+            border-color: #2575fc;
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            color: #6a11cb;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #444;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(106, 17, 203, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 17, 203, 0.4);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%);
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 6px 15px rgba(142, 158, 171, 0.4);
+        }
+        
+        .file-name {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .filter-section {
+            padding: 30px 40px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filter-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #444;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-title i {
+            margin-right: 10px;
+            color: #6a11cb;
+        }
+        
+        .filter-controls {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+        
+        @media (max-width: 992px) {
+            .filter-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .column-selector {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .keywords-input {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #444;
+            display: flex;
+            align-items: center;
+        }
+        
+        .control-label i {
+            margin-right: 8px;
+            color: #6a11cb;
+        }
+        
+        .select-box {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: border-color 0.3s;
+        }
+        
+        .select-box:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+        
+        .keywords-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-height: 150px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .keywords-textarea:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+        
+        .keywords-hint {
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 8px;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+        
+        .result-section {
+            padding: 40px;
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .result-title i {
+            margin-right: 10px;
+            color: #6a11cb;
+        }
+        
+        .copy-results-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .copy-results-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .result-card.active {
+            border: 3px solid #6a11cb;
+            background: linear-gradient(135deg, #eef2ff 0%, #d9e4ff 100%);
+        }
+        
+        .result-card .active-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #6a11cb;
+            font-size: 1.2rem;
+        }
+        
+        .result-keyword {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .result-keyword i {
+            margin-right: 8px;
+            color: #6a11cb;
+        }
+        
+        .result-amount {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #2575fc;
+            margin-bottom: 10px;
+        }
+        
+        .result-count {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .total-card {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .total-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .total-amount {
+            font-size: 2.8rem;
+            font-weight: 800;
+        }
+        
+        .data-table-section {
+            margin-top: 40px;
+        }
+        
+        .table-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #444;
+            display: flex;
+            align-items: center;
+        }
+        
+        .table-title i {
+            margin-right: 10px;
+            color: #6a11cb;
+        }
+        
+        .data-table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        .data-table th {
+            background-color: #6a11cb;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f0ebff;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #6a11cb;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background-color: #ffeaea;
+            color: #d32f2f;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .instructions {
+            background-color: #f0f7ff;
+            border-left: 4px solid #2575fc;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .instructions h3 {
+            color: #2575fc;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .instructions h3 i {
+            margin-right: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .copyable-results {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .copyable-results-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .copy-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background-color: #388E3C;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            font-size: 1.1rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            header, .upload-section, .filter-section, .result-section {
+                padding: 25px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-table {
+                font-size: 0.9rem;
+            }
+            
+            .data-table th, .data-table td {
+                padding: 10px;
+            }
+            
+            .filter-actions {
+                flex-direction: column;
+            }
+            
+            .result-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="position: absolute; top: 20px; right: 20px;">
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回导航页面
+                </a>
+            </div>
+            <h1><i class="fas fa-chart-bar"></i> Excel动态关键词筛选分析工具</h1>
+            <p class="subtitle">上传Excel文件，自定义关键词筛选并计算订单金额</p>
+        </header>
+        
+        <section class="upload-section">
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+                <ol>
+                    <li>上传包含"订单名称"和"结账总金额"列的Excel文件</li>
+                    <li>选择要筛选的列，输入关键词（每行一个关键词）</li>
+                    <li>点击"开始筛选"按钮，系统将按关键词筛选订单</li>
+                    <li>点击分析结果卡片，下方表格将只显示该关键词对应的订单</li>
+                    <li>点击"复制筛选结果"按钮可以复制所有关键词的金额结果</li>
+                </ol>
+            </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="upload-text">
+                    点击此处或拖放Excel文件到此区域上传
+                </div>
+                <p>支持 .xls, .xlsx 格式</p>
+                <input type="file" id="fileInput" class="file-input" accept=".xls,.xlsx">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-upload"></i> 选择文件
+                </button>
+                <div class="file-name" id="fileName">未选择文件</div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>正在分析Excel文件，请稍候...</p>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </section>
+        
+        <section class="filter-section" id="filterSection" style="display: none;">
+            <h2 class="filter-title"><i class="fas fa-filter"></i> 筛选设置</h2>
+            
+            <div class="filter-controls">
+                <div class="column-selector">
+                    <div class="control-group">
+                        <label class="control-label"><i class="fas fa-columns"></i> 选择筛选列</label>
+                        <select id="columnSelect" class="select-box">
+                            <option value="">请先上传Excel文件</option>
+                        </select>
+                        <div class="keywords-hint">系统已自动选择"订单名称"列，您也可以手动选择其他列</div>
+                    </div>
+                </div>
+                
+                <div class="keywords-input">
+                    <div class="control-group">
+                        <label class="control-label"><i class="fas fa-key"></i> 输入关键词</label>
+                        <textarea id="keywordsInput" class="keywords-textarea" placeholder="请输入关键词，每行一个关键词&#10;例如：&#10;全国&#10;美团&#10;千爱&#10;药房"></textarea>
+                        <div class="keywords-hint">每行一个关键词，系统将按输入顺序依次筛选</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button class="btn" id="analyzeBtn">
+                    <i class="fas fa-play-circle"></i> 开始筛选
+                </button>
+                <button class="btn btn-secondary" id="resetBtn">
+                    <i class="fas fa-redo"></i> 重置筛选
+                </button>
+            </div>
+        </section>
+        
+        <section class="result-section" id="resultSection" style="display: none;">
+            <div class="result-title">
+                <div>
+                    <i class="fas fa-chart-pie"></i> 分析结果
+                    <span style="font-size: 0.9rem; color: #777; margin-left: 10px;">点击结果卡片可筛选下方表格数据</span>
+                </div>
+                <button class="copy-results-btn" id="copyResultsBtn">
+                    <i class="fas fa-copy"></i> 复制筛选结果
+                </button>
+            </div>
+            
+            <div class="results-container" id="resultsContainer">
+                <!-- 结果将动态插入到这里 -->
+            </div>
+            
+            <div class="total-card">
+                <div class="total-title">所有筛选订单总金额</div>
+                <div class="total-amount" id="totalAmount">¥0.00</div>
+            </div>
+            
+            <div class="copyable-results" id="copyableResults">
+                <div class="copyable-results-title">
+                    <span>可复制的结果列表</span>
+                    <button class="copy-btn" id="copyTextBtn">
+                        <i class="fas fa-copy"></i> 复制
+                    </button>
+                </div>
+                <div id="resultsText"></div>
+            </div>
+        </section>
+        
+        <section class="data-table-section" id="dataTableSection" style="display: none;">
+            <h3 class="table-title"><i class="fas fa-table"></i> 订单详情</h3>
+            <div class="data-table-container">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>订单名称</th>
+                            <th>原价</th>
+                            <th>结账总金额</th>
+                            <th>关键词</th>
+                            <th>体检人</th>
+                            <th>所属单位</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- 数据将动态插入到这里 -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="no-data" id="noDataMessage">
+                暂无数据，请先上传Excel文件并开始筛选
+            </div>
+        </section>
+        
+        <footer>
+            <p>Excel动态关键词筛选分析工具 &copy; 2023 | 支持自定义关键词筛选和结果复制</p>
+        </footer>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileName = document.getElementById('fileName');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const filterSection = document.getElementById('filterSection');
+        const columnSelect = document.getElementById('columnSelect');
+        const keywordsInput = document.getElementById('keywordsInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultSection = document.getElementById('resultSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const totalAmount = document.getElementById('totalAmount');
+        const dataTableSection = document.getElementById('dataTableSection');
+        const tableBody = document.getElementById('tableBody');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const copyResultsBtn = document.getElementById('copyResultsBtn');
+        const copyableResults = document.getElementById('copyableResults');
+        const resultsText = document.getElementById('resultsText');
+        const copyTextBtn = document.getElementById('copyTextBtn');
+        
+        // 全局变量
+        let excelData = null;
+        let columnHeaders = [];
+        let selectedColumn = '';
+        let keywords = [];
+        let keywordResults = {};
+        let allFilteredItems = [];
+        let activeKeyword = '';
+        
+        // 文件拖放功能
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#2575fc';
+            uploadArea.style.backgroundColor = '#f0ebff';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#6a11cb';
+            uploadArea.style.backgroundColor = '#f9f7ff';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#6a11cb';
+            uploadArea.style.backgroundColor = '#f9f7ff';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // 文件选择处理
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+        
+        // 处理文件上传
+        function handleFileUpload(file) {
+            // 验证文件类型
+            const validTypes = [
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ];
+            
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(xls|xlsx)$/)) {
+                showError('请上传有效的Excel文件 (.xls 或 .xlsx 格式)');
+                return;
+            }
+            
+            // 显示文件名
+            fileName.textContent = `已选择文件: ${file.name}`;
+            fileName.style.color = '#6a11cb';
+            
+            // 显示加载状态
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // 读取Excel文件
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // 处理Excel数据
+                    processExcelData(workbook, file.name);
+                } catch (error) {
+                    showError('解析Excel文件时出错: ' + error.message);
+                } finally {
+                    loading.style.display = 'none';
+                }
+            };
+            
+            reader.onerror = function() {
+                showError('读取文件时出错，请重试');
+                loading.style.display = 'none';
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // 处理Excel数据
+        function processExcelData(workbook, fileName) {
+            try {
+                // 获取第一个工作表
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // 将工作表转换为JSON数据
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                if (jsonData.length < 2) {
+                    showError('Excel文件中没有数据或格式不正确');
+                    return;
+                }
+                
+                // 查找表头行
+                let headerRowIndex = -1;
+                let headerRow = [];
+                
+                // 找到包含有效表头的行（通常在前几行）
+                for (let i = 0; i < Math.min(jsonData.length, 5); i++) {
+                    const row = jsonData[i];
+                    if (Array.isArray(row) && row.length > 0) {
+                        // 检查这一行是否有足够多的非空单元格，可能是表头
+                        const nonEmptyCells = row.filter(cell => cell && cell.toString().trim() !== '');
+                        if (nonEmptyCells.length >= 3) { // 至少3列有内容
+                            headerRowIndex = i;
+                            headerRow = row;
+                            break;
+                        }
+                    }
+                }
+                
+                if (headerRowIndex === -1) {
+                    showError('未找到有效的表头行，请确认Excel格式是否正确');
+                    return;
+                }
+                
+                // 提取列标题
+                columnHeaders = [];
+                headerRow.forEach((cell, index) => {
+                    if (cell && cell.toString().trim() !== '') {
+                        columnHeaders.push({
+                            index: index,
+                            name: cell.toString().trim()
+                        });
+                    }
+                });
+                
+                // 提取数据行
+                const dataRows = [];
+                for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+                    if (row && row.length > 0) {
+                        // 创建数据对象
+                        const rowData = {};
+                        columnHeaders.forEach(header => {
+                            rowData[header.name] = row[header.index] || '';
+                        });
+                        dataRows.push(rowData);
+                    }
+                }
+                
+                // 保存数据
+                excelData = {
+                    fileName: fileName,
+                    headerRow: headerRow,
+                    columnHeaders: columnHeaders,
+                    dataRows: dataRows
+                };
+                
+                // 显示筛选区域
+                filterSection.style.display = 'block';
+                
+                // 填充列选择器
+                populateColumnSelector();
+                
+                // 设置默认关键词
+                setDefaultKeywords();
+                
+                // 显示成功消息
+                showSuccess(`Excel文件 "${fileName}" 加载成功！共找到 ${dataRows.length} 行数据，${columnHeaders.length} 个列。`);
+                
+                // 隐藏错误消息
+                errorMessage.style.display = 'none';
+                
+            } catch (error) {
+                showError('处理Excel数据时出错: ' + error.message);
+            }
+        }
+        
+        // 填充列选择器
+        function populateColumnSelector() {
+            columnSelect.innerHTML = '<option value="">请选择要筛选的列</option>';
+            
+            columnHeaders.forEach(header => {
+                const option = document.createElement('option');
+                option.value = header.name;
+                option.textContent = header.name;
+                columnSelect.appendChild(option);
+            });
+            
+            // 优先查找"订单名称"列
+            let orderNameOption = columnHeaders.find(header => 
+                header.name === "订单名称"
+            );
+            
+            // 如果没有找到"订单名称"，尝试查找包含"订单"或"名称"的列
+            if (!orderNameOption) {
+                orderNameOption = columnHeaders.find(header => 
+                    header.name.includes("订单") || header.name.includes("名称")
+                );
+            }
+            
+            // 如果找到了，则自动选择
+            if (orderNameOption) {
+                columnSelect.value = orderNameOption.name;
+            }
+        }
+        
+        // 设置默认关键词
+        function setDefaultKeywords() {
+            keywordsInput.value = "全国\n美团\n千爱\n药房";
+        }
+        
+        // 开始筛选按钮点击事件
+        analyzeBtn.addEventListener('click', performAnalysis);
+        
+        // 重置筛选按钮点击事件
+        resetBtn.addEventListener('click', resetAnalysis);
+        
+        // 复制结果按钮点击事件
+        copyResultsBtn.addEventListener('click', copyResultsToClipboard);
+        
+        // 复制文本按钮点击事件
+        copyTextBtn.addEventListener('click', copyTextToClipboard);
+        
+        // 执行分析
+        function performAnalysis() {
+            if (!excelData) {
+                showError('请先上传Excel文件');
+                return;
+            }
+            
+            selectedColumn = columnSelect.value;
+            if (!selectedColumn) {
+                showError('请选择要筛选的列');
+                return;
+            }
+            
+            // 获取关键词
+            const keywordsText = keywordsInput.value.trim();
+            if (!keywordsText) {
+                showError('请输入至少一个关键词');
+                return;
+            }
+            
+            // 解析关键词（每行一个）
+            keywords = keywordsText.split('\n')
+                .map(keyword => keyword.trim())
+                .filter(keyword => keyword !== '');
+            
+            if (keywords.length === 0) {
+                showError('请输入有效的关键词');
+                return;
+            }
+            
+            // 显示加载状态
+            loading.style.display = 'block';
+            
+            // 延迟执行以显示加载动画
+            setTimeout(() => {
+                try {
+                    // 执行筛选
+                    filterDataByKeywords();
+                    
+                    // 显示结果区域
+                    resultSection.style.display = 'block';
+                    dataTableSection.style.display = 'block';
+                    
+                    // 显示成功消息
+                    showSuccess(`筛选完成！共找到 ${allFilteredItems.length} 个匹配订单，总金额 ${calculateTotalAmount().toFixed(2)} 元。`);
+                    
+                    // 隐藏加载状态
+                    loading.style.display = 'none';
+                    
+                    // 隐藏错误消息
+                    errorMessage.style.display = 'none';
+                    
+                    // 隐藏无数据消息
+                    noDataMessage.style.display = 'none';
+                    
+                } catch (error) {
+                    showError('筛选数据时出错: ' + error.message);
+                    loading.style.display = 'none';
+                }
+            }, 500);
+        }
+        
+        // 按关键词筛选数据
+        function filterDataByKeywords() {
+            // 重置结果
+            keywordResults = {};
+            allFilteredItems = [];
+            activeKeyword = '';
+            
+            // 初始化每个关键词的结果
+            keywords.forEach(keyword => {
+                keywordResults[keyword] = {
+                    name: keyword,
+                    total: 0,
+                    count: 0,
+                    items: []
+                };
+            });
+            
+            // 筛选数据
+            excelData.dataRows.forEach(row => {
+                const columnValue = row[selectedColumn] ? row[selectedColumn].toString() : '';
+                
+                // 按顺序匹配关键词
+                for (const keyword of keywords) {
+                    if (columnValue.includes(keyword)) {
+                        // 计算金额（尝试从不同列获取）
+                        let amount = 0;
+                        
+                        // 尝试从常见的金额列获取
+                        const amountColumns = ['结账总金额', '金额', '总金额', '结账金额'];
+                        for (const amountColumn of amountColumns) {
+                            if (row[amountColumn] !== undefined) {
+                                const val = parseFloat(row[amountColumn]);
+                                if (!isNaN(val)) {
+                                    amount = val;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // 如果没找到金额列，尝试从数值列获取
+                        if (amount === 0) {
+                            for (const col in row) {
+                                const val = parseFloat(row[col]);
+                                if (!isNaN(val) && Math.abs(val) < 100000) { // 假设金额不会超过10万
+                                    amount = val;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        const item = {
+                            orderName: row[selectedColumn] || '',
+                            originalPrice: row['原价'] || row['原价'] || '',
+                            totalAmount: amount,
+                            keyword: keyword,
+                            person: row['体检人'] || row['姓名'] || '',
+                            unit: row['所属单位'] || row['单位'] || '',
+                            rowData: row
+                        };
+                        
+                        keywordResults[keyword].total += amount;
+                        keywordResults[keyword].count++;
+                        keywordResults[keyword].items.push(item);
+                        
+                        allFilteredItems.push(item);
+                        break; // 匹配到一个关键词后就不再匹配其他关键词
+                    }
+                }
+            });
+            
+            // 更新结果卡片
+            updateResultCards();
+            
+            // 更新表格数据（显示所有筛选结果）
+            updateDataTable();
+        }
+        
+        // 计算总金额
+        function calculateTotalAmount() {
+            let total = 0;
+            Object.values(keywordResults).forEach(result => {
+                total += result.total;
+            });
+            return total;
+        }
+        
+        // 更新结果卡片
+        function updateResultCards() {
+            resultsContainer.innerHTML = '';
+            
+            let allTotal = 0;
+            let allCount = 0;
+            
+            keywords.forEach(keyword => {
+                const result = keywordResults[keyword] || { total: 0, count: 0 };
+                const total = result.total || 0;
+                const count = result.count || 0;
+                
+                allTotal += total;
+                allCount += count;
+                
+                // 为每个关键词分配一个图标
+                const icons = ['fa-globe-asia', 'fa-shopping-bag', 'fa-heart', 'fa-prescription-bottle', 'fa-store', 'fa-building', 'fa-user-tie', 'fa-hospital'];
+                const iconIndex = keywords.indexOf(keyword) % icons.length;
+                const icon = icons[iconIndex];
+                
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                if (activeKeyword === keyword) {
+                    card.classList.add('active');
+                }
+                
+                card.dataset.keyword = keyword;
+                card.innerHTML = `
+                    ${activeKeyword === keyword ? '<div class="active-indicator"><i class="fas fa-check-circle"></i></div>' : ''}
+                    <div class="result-keyword"><i class="fas ${icon}"></i> ${keyword}</div>
+                    <div class="result-amount">¥${total.toFixed(2)}</div>
+                    <div class="result-count">${count} 个订单</div>
+                `;
+                
+                // 添加点击事件
+                card.addEventListener('click', () => filterTableByKeyword(keyword));
+                
+                resultsContainer.appendChild(card);
+            });
+            
+            // 更新总金额
+            totalAmount.textContent = `¥${allTotal.toFixed(2)}`;
+            
+            // 更新可复制的结果文本
+            updateCopyableResults(allTotal, allCount);
+        }
+        
+        // 按关键词筛选表格
+        function filterTableByKeyword(keyword) {
+            activeKeyword = keyword;
+            
+            // 更新卡片激活状态
+            document.querySelectorAll('.result-card').forEach(card => {
+                if (card.dataset.keyword === keyword) {
+                    card.classList.add('active');
+                    // 添加激活指示器
+                    if (!card.querySelector('.active-indicator')) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'active-indicator';
+                        indicator.innerHTML = '<i class="fas fa-check-circle"></i>';
+                        card.prepend(indicator);
+                    }
+                } else {
+                    card.classList.remove('active');
+                    // 移除激活指示器
+                    const indicator = card.querySelector('.active-indicator');
+                    if (indicator) {
+                        indicator.remove();
+                    }
+                }
+            });
+            
+            // 更新表格数据
+            updateDataTable(keyword);
+        }
+        
+        // 更新表格数据
+        function updateDataTable(filterKeyword = '') {
+            tableBody.innerHTML = '';
+            
+            let itemsToShow = [];
+            
+            if (filterKeyword) {
+                // 只显示指定关键词的项
+                const result = keywordResults[filterKeyword];
+                if (result) {
+                    itemsToShow = result.items;
+                }
+            } else {
+                // 显示所有筛选项
+                itemsToShow = allFilteredItems;
+            }
+            
+            if (itemsToShow.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="6" style="text-align: center;">
+                        ${filterKeyword ? `没有找到关键词"${filterKeyword}"的订单数据` : '没有找到匹配的订单数据'}
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            // 添加数据行到表格
+            itemsToShow.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.orderName}</td>
+                    <td>${item.originalPrice}</td>
+                    <td>${item.totalAmount.toFixed(2)}</td>
+                    <td><span style="color: #6a11cb; font-weight: 600;">${item.keyword}</span></td>
+                    <td>${item.person}</td>
+                    <td>${item.unit}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 更新可复制的结果文本
+        function updateCopyableResults(allTotal, allCount) {
+            let resultsTextContent = '';
+            
+            keywords.forEach(keyword => {
+                const result = keywordResults[keyword] || { total: 0, count: 0 };
+                const total = result.total || 0;
+                const count = result.count || 0;
+                
+                resultsTextContent += `${keyword}: ¥${total.toFixed(2)} (${count}个订单)\n`;
+            });
+            
+            resultsTextContent += `\n总计: ¥${allTotal.toFixed(2)} (${allCount}个订单)`;
+            
+            resultsText.textContent = resultsTextContent;
+            copyableResults.style.display = 'block';
+        }
+        
+        // 复制结果到剪贴板
+        function copyResultsToClipboard() {
+            const textToCopy = resultsText.textContent;
+            
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    // 显示成功提示
+                    const originalText = copyResultsBtn.innerHTML;
+                    copyResultsBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                    copyResultsBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)';
+                    
+                    setTimeout(() => {
+                        copyResultsBtn.innerHTML = originalText;
+                        copyResultsBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('复制失败: ', err);
+                    alert('复制失败，请手动选择并复制文本');
+                });
+        }
+        
+        // 复制文本到剪贴板
+        function copyTextToClipboard() {
+            const textToCopy = resultsText.textContent;
+            
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    // 显示成功提示
+                    const originalText = copyTextBtn.innerHTML;
+                    copyTextBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                    copyTextBtn.style.backgroundColor = '#2E7D32';
+                    
+                    setTimeout(() => {
+                        copyTextBtn.innerHTML = originalText;
+                        copyTextBtn.style.backgroundColor = '#4CAF50';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('复制失败: ', err);
+                    alert('复制失败，请手动选择并复制文本');
+                });
+        }
+        
+        // 重置分析
+        function resetAnalysis() {
+            // 重置筛选
+            selectedColumn = '';
+            keywords = [];
+            keywordResults = {};
+            allFilteredItems = [];
+            activeKeyword = '';
+            
+            // 重置UI
+            if (excelData) {
+                // 重新设置默认值
+                populateColumnSelector();
+                setDefaultKeywords();
+            } else {
+                columnSelect.value = '';
+                keywordsInput.value = '';
+            }
+            
+            // 隐藏结果区域
+            resultSection.style.display = 'none';
+            dataTableSection.style.display = 'none';
+            copyableResults.style.display = 'none';
+            
+            // 显示无数据消息
+            noDataMessage.style.display = 'block';
+            
+            // 重置结果容器
+            resultsContainer.innerHTML = '';
+            totalAmount.textContent = '¥0.00';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">请先上传Excel文件并开始筛选</td></tr>';
+            
+            // 显示提示消息
+            if (excelData) {
+                showSuccess('筛选已重置，您可以重新设置筛选条件。');
+            }
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            loading.style.display = 'none';
+        }
+        
+        // 显示成功信息
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Excel动态关键词筛选分析工具已加载");
+        });
+    </script>
+</body>
+</html>

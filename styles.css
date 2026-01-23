@@ -522,6 +522,75 @@ h5 {
     }
 }
 
+/* 导航页面样式 */
+.nav-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.nav-buttons .btn {
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.nav-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.nav-buttons .btn i {
+    font-size: 18px;
+}
+
+header {
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    font-size: 28px;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+header p {
+    font-size: 16px;
+    color: #64748b;
+}
+
+footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* 响应式导航页面 */
+@media (max-width: 768px) {
+    .nav-buttons .btn {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    header h1 {
+        font-size: 24px;
+    }
+    
+    header p {
+        font-size: 14px;
+    }
+}
+
 @media (max-width: 768px) {
     .filter-row {
         flex-direction: column;
@@ -546,5 +615,217 @@ h5 {
     .btn {
         margin-right: 0;
         margin-bottom: 10px;
+    }
+}
+
+/* 未打卡人员统计页面样式 */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.result-header h6 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.missing-count {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ef4444;
+    background-color: #fee2e2;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+/* 部门颜色说明 */
+.department-color-guide {
+    padding: 10px;
+    background-color: #f8fafc;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.color-indicators {
+    display: flex;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.color-indicator {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+}
+
+.color-indicator.admin {
+    background-color: #3b82f6;
+}
+
+.color-indicator.sales {
+    background-color: #10b981;
+}
+
+.color-indicator.medical {
+    background-color: #f59e0b;
+}
+
+/* 导出按钮 */
+.export-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* 未打卡人员名单 */
+.missing-persons-list {
+    margin-top: 10px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background-color: #f8fafc;
+}
+
+.missing-persons-list .department-group {
+    margin-bottom: 15px;
+}
+
+.missing-persons-list .department-group h7 {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.missing-persons-list .department-persons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 100%;
+}
+
+.missing-persons-list .department-persons {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 10px;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+    .missing-persons-list .department-persons {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .missing-persons-list .department-persons {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .missing-persons-list .department-persons {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .missing-persons-list .department-persons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.missing-persons-list .person-item {
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+.missing-persons-list .person-item.admin {
+    background-color: #3b82f6;
+}
+
+.missing-persons-list .person-item.sales {
+    background-color: #10b981;
+}
+
+.missing-persons-list .person-item.medical {
+    background-color: #f59e0b;
+}
+
+.missing-persons-list .person-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 结果标题 */
+#resultTitle {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* 无人员时的提示 */
+.missing-persons-list .no-persons {
+    text-align: center;
+    color: #10b981;
+    font-weight: 500;
+    padding: 20px;
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 150px;
+}
+
+.filter-item label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.filter-item .btn {
+    margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-item {
+        width: 100%;
+    }
+    
+    .filter-item .btn {
+        margin-top: 0;
+    }
+    
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 }

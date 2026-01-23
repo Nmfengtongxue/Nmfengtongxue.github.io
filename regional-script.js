@@ -8,69 +8,6 @@ let departments = [];
 let dates = [];
 let isAutoFilling = false;
 
-// 公司人员名单（从图片中提取）
-let dingxiPersonList = [
-    "朱甦雅", "王斌斌", "杜永丽", "张巧花", "曹娟", "史正蓓", "陈炳森", "白金玉",
-    "王莉莉", "董博", "王佳", "刘倩倩", "苏丹", "张改霞", "李雨婷", "赵改过",
-    "张英玲", "胡立茹", "杨晓晖", "王烁楠", "朱丹", "朱英", "胡秀娥", "韩万忠",
-    "程芸", "张文慧", "王倩倩", "孙悦", "郑晓燕", "魏霞", "姚建强", "潘丽萍",
-    "朱艳丽", "董凯丽", "张鹤延", "孙绿萍", "刘丹", "张丽娟", "邵倩", "王晓霞",
-    "党江娟", "刘沛", "周娜", "姜媛媛", "苏巧燕", "杨文娟"
-];
-
-// 人员名单管理功能
-function addPerson(name) {
-    if (!name || name.trim() === '') {
-        alert('请输入人员姓名');
-        return;
-    }
-    
-    name = name.trim();
-    if (!dingxiPersonList.includes(name)) {
-        dingxiPersonList.push(name);
-        alert('人员添加成功');
-    } else {
-        alert('该人员已存在');
-    }
-}
-
-function removePerson(name) {
-    if (!name || name.trim() === '') {
-        alert('请输入人员姓名');
-        return;
-    }
-    
-    name = name.trim();
-    const index = dingxiPersonList.indexOf(name);
-    if (index !== -1) {
-        dingxiPersonList.splice(index, 1);
-        alert('人员删除成功');
-    } else {
-        alert('该人员不存在');
-    }
-}
-
-function updatePerson(oldName, newName) {
-    if (!oldName || oldName.trim() === '' || !newName || newName.trim() === '') {
-        alert('请输入旧姓名和新姓名');
-        return;
-    }
-    
-    oldName = oldName.trim();
-    newName = newName.trim();
-    const index = dingxiPersonList.indexOf(oldName);
-    if (index !== -1) {
-        dingxiPersonList[index] = newName;
-        alert('人员更新成功');
-    } else {
-        alert('旧姓名不存在');
-    }
-}
-
-function getPersonList() {
-    return dingxiPersonList;
-}
-
 // 部门人数数据
 const departmentCounts = {
     "定西": {"销售部": 6, "医疗部": 30, "行政部": 7},
@@ -412,13 +349,8 @@ function createForwardTable() {
     
     // 添加合计转发数列
     const totalForwardTh = document.createElement('th');
-    totalForwardTh.textContent = '宣发总量(条)'; // 修改表头文本
+    totalForwardTh.textContent = '宣发总量(条)';
     headerRow.appendChild(totalForwardTh);
-    
-    // 移除宣发总量列
-    // const totalPostTh = document.createElement('th');
-    // totalPostTh.textContent = '宣发总量(条)';
-    // headerRow.appendChild(totalPostTh);
     
     thead.appendChild(headerRow);
     forwardTable.appendChild(thead);
@@ -436,7 +368,7 @@ function createForwardTable() {
     // 添加各公司/分院行
     companyList.forEach((company, index) => {
         const row = document.createElement('tr');
-        row.classList.add('draggable-row'); // 添加可拖拽行的类名
+        row.classList.add('draggable-row');
         
         // 排名单元格
         const rankCell = document.createElement('td');
@@ -455,7 +387,7 @@ function createForwardTable() {
             countCell.className = 'department-count';
             countCell.dataset.branch = company;
             countCell.dataset.dept = dept;
-            countCell.contentEditable = true; // 设为可编辑
+            countCell.contentEditable = true;
             
             // 填入默认人数数据，使用增强的匹配算法
             let departmentCount = getDepartmentCount(company, dept);
@@ -496,7 +428,7 @@ function createForwardTable() {
             forwardCell.className = 'forward-count';
             forwardCell.dataset.branch = company;
             forwardCell.dataset.dept = dept;
-            forwardCell.textContent = '0'; // 默认值为0
+            forwardCell.textContent = '0';
             row.appendChild(forwardCell);
         });
         
@@ -514,12 +446,6 @@ function createForwardTable() {
         totalForwardCell.className = 'total-forward-count';
         totalForwardCell.textContent = '0';
         row.appendChild(totalForwardCell);
-        
-        // 移除宣发总量单元格
-        // const totalPostCell = document.createElement('td');
-        // totalPostCell.className = 'total-post-count';
-        // totalPostCell.textContent = '';
-        // row.appendChild(totalPostCell);
         
         tbody.appendChild(row);
     });
@@ -581,12 +507,6 @@ function createForwardTable() {
     totalForwardTotalCell.textContent = '0';
     deptTotalRow.appendChild(totalForwardTotalCell);
     
-    // 移除宣发总量总计
-    // const totalPostTotalCell = document.createElement('td');
-    // totalPostTotalCell.id = 'grand-total';
-    // totalPostTotalCell.textContent = '0';
-    // deptTotalRow.appendChild(totalPostTotalCell);
-    
     tbody.appendChild(deptTotalRow);
     forwardTable.appendChild(tbody);
     
@@ -603,8 +523,8 @@ function initDragSort() {
     new Sortable(tbody, {
         animation: 150,
         ghostClass: 'sortable-ghost',
-        handle: 'td:first-child', // 只能通过第一列拖拽
-        filter: '.sum-row', // 排除总计行
+        handle: 'td:first-child',
+        filter: '.sum-row',
         onEnd: function(evt) {
             // 拖拽结束后更新companies数组的顺序
             updateCompaniesOrder();
@@ -818,7 +738,7 @@ function countForwardTimes() {
     
     // 验证是否选择了公司和部门
     if (!companyFilter || !departmentFilter) {
-        return; // 一键遍历中不弹出警告
+        return;
     }
     
     // 获取筛选后的数据
@@ -886,7 +806,7 @@ function updateBranchTotals(branch) {
     // 找到对应的总计单元格
     const rows = document.querySelectorAll('#forwardTable tbody tr');
     for (const row of rows) {
-        const nameCell = row.querySelector('td:nth-child(2)'); // 公司名称单元格在第2列
+        const nameCell = row.querySelector('td:nth-child(2)');
         if (nameCell && nameCell.textContent === branch) {
             // 更新合计转发数单元格
             const totalForwardCell = row.querySelector('.total-forward-count');
@@ -940,7 +860,7 @@ function updateTotalPersonCount(company) {
     // 找到对应的公司行
     const rows = document.querySelectorAll('#forwardTable tbody tr');
     for (const row of rows) {
-        const nameCell = row.querySelector('td:nth-child(2)'); // 公司名称单元格在第2列
+        const nameCell = row.querySelector('td:nth-child(2)');
         if (nameCell && nameCell.textContent === company) {
             // 更新合计人数单元格
             const totalPersonCell = row.querySelector('.total-person-count');
@@ -1016,247 +936,7 @@ window.addEventListener('DOMContentLoaded', function() {
             exportToSVG();
         });
     }
-    
-    // 添加人员对比按钮事件监听器
-    const compareBtn = document.getElementById('compareBtn');
-    if (compareBtn) {
-        compareBtn.addEventListener('click', comparePersonLists);
-    }
-    
-    // 添加管理人员名单按钮事件监听器
-    const managePersonsBtn = document.getElementById('managePersonsBtn');
-    if (managePersonsBtn) {
-        managePersonsBtn.addEventListener('click', function() {
-            const personManagementSection = document.getElementById('personManagementSection');
-            personManagementSection.style.display = 'block';
-            
-            // 初始化查看名单
-            renderPersonList();
-        });
-    }
-    
-    // 初始化标签页切换
-    initTabs();
-    
-    // 添加人员按钮事件监听器
-    const addPersonBtn = document.getElementById('addPersonBtn');
-    if (addPersonBtn) {
-        addPersonBtn.addEventListener('click', function() {
-            const addName = document.getElementById('addName').value;
-            addPerson(addName);
-            document.getElementById('addName').value = '';
-            renderPersonList();
-        });
-    }
-    
-    // 删除人员按钮事件监听器
-    const removePersonBtn = document.getElementById('removePersonBtn');
-    if (removePersonBtn) {
-        removePersonBtn.addEventListener('click', function() {
-            const removeName = document.getElementById('removeName').value;
-            removePerson(removeName);
-            document.getElementById('removeName').value = '';
-            renderPersonList();
-        });
-    }
-    
-    // 更新人员按钮事件监听器
-    const updatePersonBtn = document.getElementById('updatePersonBtn');
-    if (updatePersonBtn) {
-        updatePersonBtn.addEventListener('click', function() {
-            const oldName = document.getElementById('oldName').value;
-            const newName = document.getElementById('newName').value;
-            updatePerson(oldName, newName);
-            document.getElementById('oldName').value = '';
-            document.getElementById('newName').value = '';
-            renderPersonList();
-        });
-    }
 });
-
-// 初始化标签页
-function initTabs() {
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const tab = this.getAttribute('data-tab');
-            
-            // 切换标签按钮状态
-            tabBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 切换标签内容
-            tabPanes.forEach(pane => {
-                pane.classList.remove('active');
-                if (pane.id === tab + '-tab') {
-                    pane.classList.add('active');
-                }
-            });
-            
-            // 如果切换到查看名单标签，重新渲染名单
-            if (tab === 'view') {
-                renderPersonList();
-            }
-        });
-    });
-}
-
-// 渲染人员名单
-function renderPersonList() {
-    const personListView = document.getElementById('personListView');
-    const personCount = document.getElementById('personCount');
-    
-    if (personListView && personCount) {
-        // 清空现有内容
-        personListView.innerHTML = '';
-        
-        // 更新人数
-        personCount.textContent = dingxiPersonList.length;
-        
-        // 创建人员列表
-        const ul = document.createElement('ul');
-        ul.style.listStyleType = 'none';
-        ul.style.padding = '0';
-        ul.style.display = 'grid';
-        ul.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-        ul.style.gap = '8px';
-        
-        dingxiPersonList.forEach((person, index) => {
-            const li = document.createElement('li');
-            li.style.padding = '5px 10px';
-            li.style.backgroundColor = '#e0f2fe';
-            li.style.borderRadius = '4px';
-            li.style.fontSize = '13px';
-            li.style.textAlign = 'center';
-            li.textContent = `${index + 1}. ${person}`;
-            ul.appendChild(li);
-        });
-        
-        personListView.appendChild(ul);
-    }
-}
-
-// 判断是否为定西公司的辅助函数
-function isDingxiCompany(company) {
-    // 1. 精确匹配
-    if (company === '定西') {
-        return true;
-    }
-    
-    // 2. 标准化匹配（去除空格、统一大小写）
-    const normalizedCompany = company.trim().replace(/\s+/g, '').toLowerCase();
-    const normalizedDingxi = '定西'.trim().replace(/\s+/g, '').toLowerCase();
-    if (normalizedCompany === normalizedDingxi) {
-        return true;
-    }
-    
-    // 3. 子字符串匹配（处理公司名称前缀或后缀差异）
-    if (normalizedCompany.includes(normalizedDingxi)) {
-        return true;
-    }
-    
-    // 4. 拼音首字母匹配（作为最后手段）
-    const getFirstLetter = (str) => {
-        // 简单的拼音首字母获取，只处理部分常见汉字
-        const pinyinMap = {
-            '定': 'd', '西': 'x', '陇': 'l', '南': 'n', '庆': 'q', '阳': 'y',
-            '临': 'l', '夏': 'x', '西': 'x', '宁': 'n', '兰': 'l', '州': 'z',
-            '武': 'w', '威': 'w', '平': 'p', '凉': 'l', '酒': 'j', '泉': 'q',
-            '天': 't', '水': 's', '白': 'b', '银': 'y'
-        };
-        
-        let result = '';
-        for (const char of str) {
-            result += pinyinMap[char] || char.toLowerCase();
-        }
-        return result;
-    };
-    
-    const companyFirstLetter = getFirstLetter(company);
-    const dingxiFirstLetter = getFirstLetter('定西');
-    if (companyFirstLetter === dingxiFirstLetter) {
-        return true;
-    }
-    
-    return false;
-}
-
-// 对比人员名单功能
-function comparePersonLists() {
-    const companyFilter = document.getElementById('companyFilter').value;
-    const dateFilter = document.getElementById('dateFilter').value;
-    
-    // 验证是否选择了公司和日期
-    if (!companyFilter || !dateFilter) {
-        alert('请选择公司和日期进行对比');
-        return;
-    }
-    
-    // 验证是否选择了定西公司
-    if (!isDingxiCompany(companyFilter)) {
-        alert('当前功能仅支持定西公司的人员对比');
-        return;
-    }
-    
-    // 获取筛选后的数据
-    const filteredData = getFilteredData();
-    
-    // 提取Excel中的人员名单
-    const excelPersonList = [];
-    const nameIndex = headers.findIndex(header => 
-        header.includes('姓名') || header.includes('名字') || header.includes('人员')
-    );
-    
-    if (nameIndex === -1) {
-        alert('无法在Excel文件中找到姓名列');
-        return;
-    }
-    
-    filteredData.forEach(row => {
-        if (nameIndex < row.length && row[nameIndex] !== '' && row[nameIndex] !== null) {
-            excelPersonList.push(row[nameIndex].trim());
-        }
-    });
-    
-    // 找出未打卡人员
-    const missingPersons = dingxiPersonList.filter(person => 
-        !excelPersonList.includes(person)
-    );
-    
-    // 显示对比结果
-    displayComparisonResult(missingPersons, excelPersonList.length);
-}
-
-// 显示对比结果
-function displayComparisonResult(missingPersons, presentCount) {
-    const comparisonSection = document.getElementById('comparisonSection');
-    const missingPersonsList = document.getElementById('missingPersonsList');
-    const totalPersonsEl = document.getElementById('totalPersons');
-    const presentPersonsEl = document.getElementById('presentPersons');
-    const missingPersonsEl = document.getElementById('missingPersons');
-    
-    // 显示对比结果区域
-    comparisonSection.style.display = 'block';
-    
-    // 更新统计信息
-    totalPersonsEl.textContent = dingxiPersonList.length;
-    presentPersonsEl.textContent = presentCount;
-    missingPersonsEl.textContent = missingPersons.length;
-    
-    // 显示未打卡人员名单
-    if (missingPersons.length > 0) {
-        let listHTML = '<ul>';
-        missingPersons.forEach(person => {
-            listHTML += `<li>${person}</li>`;
-        });
-        listHTML += '</ul>';
-        missingPersonsList.innerHTML = listHTML;
-    } else {
-        missingPersonsList.innerHTML = '<p class="text-success">所有人员均已打卡</p>';
-    }
-}
 
 // 导出SVG
 function exportToSVG() {
@@ -1265,7 +945,7 @@ function exportToSVG() {
     
     // 获取表格尺寸
     const tableRect = table.getBoundingClientRect();
-    const width = tableRect.width + 40; // 增加边距
+    const width = tableRect.width + 40;
     const height = tableRect.height + 40;
     
     // 创建SVG内容
@@ -1303,9 +983,9 @@ function exportToSVG() {
     
     // 获取数据行
     const rows = table.querySelectorAll('tbody tr');
-    let y = 30; // 表头高度
+    let y = 30;
     rows.forEach((row, rowIndex) => {
-        const rowHeight = 30; // 默认行高
+        const rowHeight = 30;
         const cells = row.querySelectorAll('td');
         
         let x = 0;
