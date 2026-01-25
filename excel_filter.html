@@ -4,141 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel动态关键词筛选分析工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            padding: 30px 40px;
-            text-align: center;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-bottom: 15px;
-        }
-        
-        .upload-section {
-            padding: 40px;
-            border-bottom: 1px solid #eee;
-        }
-        
         .upload-area {
-            border: 3px dashed #6a11cb;
+            border: 3px dashed var(--primary-color);
             border-radius: 10px;
             padding: 50px 20px;
             text-align: center;
-            background-color: #f9f7ff;
+            background-color: var(--secondary-color);
             transition: all 0.3s ease;
             cursor: pointer;
         }
         
         .upload-area:hover {
-            background-color: #f0ebff;
-            border-color: #2575fc;
+            background-color: var(--highlight-color);
+            border-color: var(--accent-color);
         }
         
         .upload-icon {
             font-size: 60px;
-            color: #6a11cb;
+            color: var(--primary-color);
             margin-bottom: 20px;
         }
         
         .upload-text {
             font-size: 1.2rem;
             margin-bottom: 15px;
-            color: #444;
+            color: var(--text-color);
         }
         
         .file-input {
             display: none;
         }
         
-        .btn {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-block;
-            box-shadow: 0 4px 10px rgba(106, 17, 203, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(106, 17, 203, 0.4);
-        }
-        
-        .btn i {
-            margin-right: 8px;
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%);
-            color: #333;
-        }
-        
-        .btn-secondary:hover {
-            box-shadow: 0 6px 15px rgba(142, 158, 171, 0.4);
-        }
-        
         .file-name {
             margin-top: 15px;
-            color: #666;
+            color: var(--text-color);
             font-size: 0.9rem;
-        }
-        
-        .filter-section {
-            padding: 30px 40px;
-            background-color: #f9f9f9;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .filter-title {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #444;
-            display: flex;
-            align-items: center;
-        }
-        
-        .filter-title i {
-            margin-right: 10px;
-            color: #6a11cb;
         }
         
         .filter-controls {
@@ -156,16 +61,16 @@
         
         .column-selector {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 6px;
             padding: 25px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .keywords-input {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 6px;
             padding: 25px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .control-group {
@@ -176,36 +81,36 @@
             display: block;
             font-weight: 600;
             margin-bottom: 10px;
-            color: #444;
+            color: var(--text-color);
             display: flex;
             align-items: center;
         }
         
         .control-label i {
             margin-right: 8px;
-            color: #6a11cb;
+            color: var(--primary-color);
         }
         
         .select-box {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             font-size: 1rem;
             background-color: #fff;
             transition: border-color 0.3s;
         }
         
         .select-box:focus {
-            border-color: #6a11cb;
+            border-color: var(--primary-color);
             outline: none;
         }
         
         .keywords-textarea {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             font-size: 1rem;
             min-height: 150px;
             resize: vertical;
@@ -213,7 +118,7 @@
         }
         
         .keywords-textarea:focus {
-            border-color: #6a11cb;
+            border-color: var(--primary-color);
             outline: none;
         }
         
@@ -229,43 +134,6 @@
             justify-content: flex-end;
         }
         
-        .result-section {
-            padding: 40px;
-        }
-        
-        .result-title {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #444;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .result-title i {
-            margin-right: 10px;
-            color: #6a11cb;
-        }
-        
-        .copy-results-btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-        
-        .copy-results-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
-        }
-        
         .results-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -274,11 +142,12 @@
         }
         
         .result-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-            border-radius: 12px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             padding: 25px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
@@ -287,26 +156,26 @@
         
         .result-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
         .result-card.active {
-            border: 3px solid #6a11cb;
-            background: linear-gradient(135deg, #eef2ff 0%, #d9e4ff 100%);
+            border: 3px solid var(--primary-color);
+            background-color: var(--highlight-color);
         }
         
         .result-card .active-indicator {
             position: absolute;
             top: 10px;
             right: 10px;
-            color: #6a11cb;
+            color: var(--primary-color);
             font-size: 1.2rem;
         }
         
         .result-keyword {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #333;
+            color: var(--text-color);
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -315,26 +184,26 @@
         
         .result-keyword i {
             margin-right: 8px;
-            color: #6a11cb;
+            color: var(--primary-color);
         }
         
         .result-amount {
             font-size: 2.2rem;
             font-weight: 800;
-            color: #2575fc;
+            color: var(--primary-color);
             margin-bottom: 10px;
         }
         
         .result-count {
             font-size: 1rem;
-            color: #666;
+            color: var(--text-color);
             margin-top: 10px;
         }
         
         .total-card {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background-color: var(--primary-color);
             color: white;
-            border-radius: 12px;
+            border-radius: 6px;
             padding: 30px;
             text-align: center;
             margin-top: 20px;
@@ -351,27 +220,10 @@
             font-weight: 800;
         }
         
-        .data-table-section {
-            margin-top: 40px;
-        }
-        
-        .table-title {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #444;
-            display: flex;
-            align-items: center;
-        }
-        
-        .table-title i {
-            margin-right: 10px;
-            color: #6a11cb;
-        }
-        
         .data-table-container {
             overflow-x: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .data-table {
@@ -381,7 +233,7 @@
         }
         
         .data-table th {
-            background-color: #6a11cb;
+            background-color: var(--primary-color);
             color: white;
             padding: 15px;
             text-align: left;
@@ -390,15 +242,15 @@
         
         .data-table td {
             padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .data-table tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: var(--secondary-color);
         }
         
         .data-table tr:hover {
-            background-color: #f0ebff;
+            background-color: var(--highlight-color);
         }
         
         .loading {
@@ -409,7 +261,7 @@
         
         .loading-spinner {
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #6a11cb;
+            border-top: 5px solid var(--primary-color);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -441,15 +293,15 @@
         }
         
         .instructions {
-            background-color: #f0f7ff;
-            border-left: 4px solid #2575fc;
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
             padding: 20px;
             margin-bottom: 30px;
             border-radius: 0 8px 8px 0;
         }
         
         .instructions h3 {
-            color: #2575fc;
+            color: var(--primary-color);
             margin-bottom: 10px;
             display: flex;
             align-items: center;
@@ -468,9 +320,9 @@
         }
         
         .copyable-results {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             padding: 20px;
             margin-top: 30px;
             font-family: 'Courier New', monospace;
@@ -484,67 +336,20 @@
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 10px;
-            color: #444;
+            color: var(--text-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .copy-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 6px 15px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .copy-btn:hover {
-            background-color: #388E3C;
-        }
-        
         .no-data {
             text-align: center;
             padding: 40px;
-            color: #777;
+            color: var(--text-color);
             font-size: 1.1rem;
         }
         
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            font-size: 0.9rem;
-            border-top: 1px solid #eee;
-        }
-        
         @media (max-width: 768px) {
-            .container {
-                border-radius: 0;
-            }
-            
-            header, .upload-section, .filter-section, .result-section {
-                padding: 25px 20px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .results-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .data-table {
-                font-size: 0.9rem;
-            }
-            
-            .data-table th, .data-table td {
-                padding: 10px;
-            }
-            
             .filter-actions {
                 flex-direction: column;
             }
@@ -560,140 +365,155 @@
 <body>
     <div class="container">
         <header>
-            <div style="position: absolute; top: 20px; right: 20px;">
-                <a href="index.html" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> 返回导航页面
-                </a>
+            <div class="text-center">
+                <h1><i class="fas fa-chart-bar"></i> Excel动态关键词筛选分析工具</h1>
+                <p>上传Excel文件，自定义关键词筛选并计算订单金额</p>
+                <div class="mt-3">
+                    <a href="index.html" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> 返回导航页面
+                    </a>
+                </div>
             </div>
-            <h1><i class="fas fa-chart-bar"></i> Excel动态关键词筛选分析工具</h1>
-            <p class="subtitle">上传Excel文件，自定义关键词筛选并计算订单金额</p>
         </header>
         
-        <section class="upload-section">
-            <div class="instructions">
-                <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
-                <ol>
-                    <li>上传包含"订单名称"和"结账总金额"列的Excel文件</li>
-                    <li>选择要筛选的列，输入关键词（每行一个关键词）</li>
-                    <li>点击"开始筛选"按钮，系统将按关键词筛选订单</li>
-                    <li>点击分析结果卡片，下方表格将只显示该关键词对应的订单</li>
-                    <li>点击"复制筛选结果"按钮可以复制所有关键词的金额结果</li>
-                </ol>
-            </div>
-            
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">
-                    <i class="fas fa-file-excel"></i>
+        <div class="card">
+            <div class="card-body">
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+                    <ol>
+                        <li>上传包含"订单名称"和"结账总金额"列的Excel文件</li>
+                        <li>选择要筛选的列，输入关键词（每行一个关键词）</li>
+                        <li>点击"开始筛选"按钮，系统将按关键词筛选订单</li>
+                        <li>点击分析结果卡片，下方表格将只显示该关键词对应的订单</li>
+                        <li>点击"复制筛选结果"按钮可以复制所有关键词的金额结果</li>
+                    </ol>
                 </div>
-                <div class="upload-text">
-                    点击此处或拖放Excel文件到此区域上传
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <div class="upload-text">
+                        点击此处或拖放Excel文件到此区域上传
+                    </div>
+                    <p>支持 .xls, .xlsx 格式</p>
+                    <input type="file" id="fileInput" class="file-input" accept=".xls,.xlsx">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-upload"></i> 选择文件
+                    </button>
+                    <div class="file-name" id="fileName">未选择文件</div>
                 </div>
-                <p>支持 .xls, .xlsx 格式</p>
-                <input type="file" id="fileInput" class="file-input" accept=".xls,.xlsx">
-                <button class="btn" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-upload"></i> 选择文件
-                </button>
-                <div class="file-name" id="fileName">未选择文件</div>
+                
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在分析Excel文件，请稍候...</p>
+                </div>
+                
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
             </div>
-            
-            <div class="loading" id="loading">
-                <div class="loading-spinner"></div>
-                <p>正在分析Excel文件，请稍候...</p>
-            </div>
-            
-            <div class="error-message" id="errorMessage"></div>
-            <div class="success-message" id="successMessage"></div>
-        </section>
+        </div>
         
-        <section class="filter-section" id="filterSection" style="display: none;">
-            <h2 class="filter-title"><i class="fas fa-filter"></i> 筛选设置</h2>
-            
-            <div class="filter-controls">
-                <div class="column-selector">
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-columns"></i> 选择筛选列</label>
-                        <select id="columnSelect" class="select-box">
-                            <option value="">请先上传Excel文件</option>
-                        </select>
-                        <div class="keywords-hint">系统已自动选择"订单名称"列，您也可以手动选择其他列</div>
+        <div class="card" id="filterSection" style="display: none;">
+            <div class="card-header">
+                <h2 class="mb-0"><i class="fas fa-filter"></i> 筛选设置</h2>
+            </div>
+            <div class="card-body">
+                <div class="filter-controls">
+                    <div class="column-selector">
+                        <div class="control-group">
+                            <label class="control-label"><i class="fas fa-columns"></i> 选择筛选列</label>
+                            <select id="columnSelect" class="select-box">
+                                <option value="">请先上传Excel文件</option>
+                            </select>
+                            <div class="keywords-hint">系统已自动选择"订单名称"列，您也可以手动选择其他列</div>
+                        </div>
+                    </div>
+                    
+                    <div class="keywords-input">
+                        <div class="control-group">
+                            <label class="control-label"><i class="fas fa-key"></i> 输入关键词</label>
+                            <textarea id="keywordsInput" class="keywords-textarea" placeholder="请输入关键词，每行一个关键词&#10;例如：&#10;全国&#10;美团&#10;千爱&#10;药房"></textarea>
+                            <div class="keywords-hint">每行一个关键词，系统将按输入顺序依次筛选</div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="keywords-input">
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-key"></i> 输入关键词</label>
-                        <textarea id="keywordsInput" class="keywords-textarea" placeholder="请输入关键词，每行一个关键词&#10;例如：&#10;全国&#10;美团&#10;千爱&#10;药房"></textarea>
-                        <div class="keywords-hint">每行一个关键词，系统将按输入顺序依次筛选</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="filter-actions">
-                <button class="btn" id="analyzeBtn">
-                    <i class="fas fa-play-circle"></i> 开始筛选
-                </button>
-                <button class="btn btn-secondary" id="resetBtn">
-                    <i class="fas fa-redo"></i> 重置筛选
-                </button>
-            </div>
-        </section>
-        
-        <section class="result-section" id="resultSection" style="display: none;">
-            <div class="result-title">
-                <div>
-                    <i class="fas fa-chart-pie"></i> 分析结果
-                    <span style="font-size: 0.9rem; color: #777; margin-left: 10px;">点击结果卡片可筛选下方表格数据</span>
-                </div>
-                <button class="copy-results-btn" id="copyResultsBtn">
-                    <i class="fas fa-copy"></i> 复制筛选结果
-                </button>
-            </div>
-            
-            <div class="results-container" id="resultsContainer">
-                <!-- 结果将动态插入到这里 -->
-            </div>
-            
-            <div class="total-card">
-                <div class="total-title">所有筛选订单总金额</div>
-                <div class="total-amount" id="totalAmount">¥0.00</div>
-            </div>
-            
-            <div class="copyable-results" id="copyableResults">
-                <div class="copyable-results-title">
-                    <span>可复制的结果列表</span>
-                    <button class="copy-btn" id="copyTextBtn">
-                        <i class="fas fa-copy"></i> 复制
+                <div class="filter-actions">
+                    <button class="btn btn-primary" id="analyzeBtn">
+                        <i class="fas fa-play-circle"></i> 开始筛选
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <i class="fas fa-redo"></i> 重置筛选
                     </button>
                 </div>
-                <div id="resultsText"></div>
             </div>
-        </section>
+        </div>
         
-        <section class="data-table-section" id="dataTableSection" style="display: none;">
-            <h3 class="table-title"><i class="fas fa-table"></i> 订单详情</h3>
-            <div class="data-table-container">
-                <table class="data-table" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>订单名称</th>
-                            <th>原价</th>
-                            <th>结账总金额</th>
-                            <th>关键词</th>
-                            <th>体检人</th>
-                            <th>所属单位</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <!-- 数据将动态插入到这里 -->
-                    </tbody>
-                </table>
+        <div class="card" id="resultSection" style="display: none;">
+            <div class="card-header">
+                <div class="result-title">
+                    <h2 class="mb-0"><i class="fas fa-chart-pie"></i> 分析结果</h2>
+                    <span style="font-size: 0.9rem; color: white; margin-left: 10px;">点击结果卡片可筛选下方表格数据</span>
+                </div>
             </div>
-            <div class="no-data" id="noDataMessage">
-                暂无数据，请先上传Excel文件并开始筛选
+            <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-success" id="copyResultsBtn">
+                        <i class="fas fa-copy"></i> 复制筛选结果
+                    </button>
+                </div>
+                
+                <div class="results-container" id="resultsContainer">
+                    <!-- 结果将动态插入到这里 -->
+                </div>
+                
+                <div class="total-card">
+                    <div class="total-title">所有筛选订单总金额</div>
+                    <div class="total-amount" id="totalAmount">¥0.00</div>
+                </div>
+                
+                <div class="copyable-results" id="copyableResults">
+                    <div class="copyable-results-title">
+                        <span>可复制的结果列表</span>
+                        <button class="btn btn-success" id="copyTextBtn">
+                            <i class="fas fa-copy"></i> 复制
+                        </button>
+                    </div>
+                    <div id="resultsText"></div>
+                </div>
             </div>
-        </section>
+        </div>
         
-        <footer>
+        <div class="card" id="dataTableSection" style="display: none;">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-table"></i> 订单详情</h3>
+            </div>
+            <div class="card-body">
+                <div class="data-table-container">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>订单名称</th>
+                                <th>原价</th>
+                                <th>结账总金额</th>
+                                <th>关键词</th>
+                                <th>体检人</th>
+                                <th>所属单位</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- 数据将动态插入到这里 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="no-data" id="noDataMessage">
+                    暂无数据，请先上传Excel文件并开始筛选
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center mt-5">
             <p>Excel动态关键词筛选分析工具 &copy; 2023 | 支持自定义关键词筛选和结果复制</p>
         </footer>
     </div>
