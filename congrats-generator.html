@@ -841,14 +841,75 @@
                 return;
             }
             
-            // 尝试从服务器加载不同格式的头像文件
+            // 尝试从服务器加载头像（从HTML文件中提取base64数据）
             function tryLoadServerAvatar() {
-                const extensions = ['.jpg', '.png', '.jpeg', '.gif', '.webp'];
-                let currentExtensionIndex = 0;
-            
-                function tryLoadAvatar(extensionIndex) {
-                    if (extensionIndex >= extensions.length) {
-                        // 所有格式都尝试失败
+                // 从GitHub仓库加载对应的HTML文件
+                const htmlFilePath = `https://raw.githubusercontent.com/Nmfengtongxue/daily_imgs/main/${nameInput}.html`;
+                
+                // 发送请求获取HTML文件内容
+                fetch(htmlFilePath)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('HTML文件未找到');
+                        }
+                        return response.text();
+                    })
+                    .then(htmlContent => {
+                        // 从HTML内容中提取base64图片数据
+                        const imgMatch = htmlContent.match(/<img[^>]+src="(data:image[^"]+)"[^>]*>/);
+                        if (!imgMatch || !imgMatch[1]) {
+                            throw new Error('未找到图片数据');
+                        }
+                        
+                        const base64Data = imgMatch[1];
+                        
+                        // 创建图片对象
+                        const img = new Image();
+                        img.onload = function() {
+                            // 检查图片是否有效（非空）
+                            if (img.width === 0 || img.height === 0) {
+                                throw new Error('图片数据无效');
+                            }
+                            
+                            // 显示预览
+                            previewArea.innerHTML = '';
+                            previewArea.appendChild(img);
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'cover';
+                            
+                            // 启用确认按钮
+                            confirmBtn.disabled = false;
+                            
+                            // 存储当前预览的头像信息
+                            currentPreviewAvatar = {
+                                name: nameInput,
+                                dept: PERSONNEL_MAP[nameInput],
+                                image: img
+                            };
+                            
+                            // 显示提示
+                            avatarTip.textContent = `找到【${nameInput}】的信息，部门：${PERSONNEL_MAP[nameInput]}`;
+                            avatarTip.style.color = '#28a745';
+                            
+                            // 自动填充姓名和部门
+                            document.getElementById('nameContent').value = nameInput;
+                            document.getElementById('deptContent').value = PERSONNEL_MAP[nameInput];
+                            updateTextObject('name');
+                            updateTextObject('dept');
+                            updateCongratsText();
+                        };
+                        
+                        img.onerror = function() {
+                            throw new Error('图片加载失败');
+                        };
+                        
+                        // 加载base64图片数据
+                        img.src = base64Data;
+                    })
+                    .catch(error => {
+                        console.error('加载头像失败:', error);
+                        // 所有尝试都失败
                         previewArea.innerHTML = '<span style="color: #6c757d; font-size: 14px;">头像未找到</span>';
                         avatarTip.textContent = `未找到【${nameInput}】的头像图片，请使用"上传并保存"功能！`;
                         avatarTip.style.color = '#ffc107';
@@ -856,63 +917,7 @@
                         confirmBtn.disabled = true;
                         // 清除当前预览的头像信息
                         currentPreviewAvatar = null;
-                        return;
-                    }
-                    
-                    const extension = extensions[extensionIndex];
-                    // 使用GitHub仓库的URL路径
-                    const avatarPath = `https://raw.githubusercontent.com/Nmfengtongxue/daily_imgs/main/2026-01-31%20人员名单照片/${nameInput}${extension}`;
-                    
-                    // 创建图片对象
-                    const img = new Image();
-                    img.onload = function() {
-                        // 检查图片是否有效（非空）
-                        if (img.width === 0 || img.height === 0) {
-                            // 图片为空，尝试下一个格式
-                            tryLoadAvatar(extensionIndex + 1);
-                            return;
-                        }
-                        
-                        // 显示预览
-                        previewArea.innerHTML = '';
-                        previewArea.appendChild(img);
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.objectFit = 'cover';
-                        
-                        // 启用确认按钮
-                        confirmBtn.disabled = false;
-                        
-                        // 存储当前预览的头像信息
-                        currentPreviewAvatar = {
-                            name: nameInput,
-                            dept: PERSONNEL_MAP[nameInput],
-                            image: img
-                        };
-                        
-                        // 显示提示
-                        avatarTip.textContent = `找到【${nameInput}】的信息，部门：${PERSONNEL_MAP[nameInput]}`;
-                        avatarTip.style.color = '#28a745';
-                        
-                        // 自动填充姓名和部门
-                        document.getElementById('nameContent').value = nameInput;
-                        document.getElementById('deptContent').value = PERSONNEL_MAP[nameInput];
-                        updateTextObject('name');
-                        updateTextObject('dept');
-                        updateCongratsText();
-                    };
-                    
-                    img.onerror = function() {
-                        // 当前格式加载失败，尝试下一个格式
-                        tryLoadAvatar(extensionIndex + 1);
-                    };
-                    
-                    // 尝试加载头像
-                    img.src = avatarPath;
-                }
-                
-                // 开始尝试加载头像
-                tryLoadAvatar(currentExtensionIndex);
+                    });
             }
             
             // 开始尝试从服务器加载头像
