@@ -1,0 +1,1496 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>喜报生成工具</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="styles.css"><style>
+        /* 加载网络字体（使用备用方案） */
+        @font-face {
+            font-family: 'ChuangkitZongYi';
+            src: local('SimHei'), local('黑体');
+            font-weight: bold;
+        }
+        @font-face {
+            font-family: 'NotoSansSCBlack';
+            src: local('SimHei'), local('黑体');
+            font-weight: normal;
+        }
+        @font-face {
+            font-family: 'NotoSansSCMedium';
+            src: local('SimHei'), local('黑体');
+            font-weight: normal;
+        }
+        /* 上传区域 */
+        .upload-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        #fileInput {
+            display: block;
+            margin: 0 auto 15px;
+            padding: 10px 20px;
+            font-size: 14px;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            max-width: 300px;
+        }
+        #fileInput:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+        .upload-section p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        /* 主布局 */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1200px;
+            gap: 20px;
+            margin: 0 auto 20px;
+            max-width: 1900px;
+            align-items: start;
+        }
+        /* 控制面板容器 */
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            height: auto;
+            overflow-y: auto;
+            box-sizing: border-box;
+            min-width: 0;
+            max-height: 1600px;
+            margin-bottom: 0;
+        }
+        /* 画布容器包装 */
+        .canvas-wrapper {
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            height: auto;
+            overflow-y: auto;
+            box-sizing: border-box;
+            min-width: 0;
+            max-height: 1600px;
+            margin-bottom: 0;
+        }
+        /* 两列布局 */
+        .text-editors {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .editor-section {
+            margin-bottom: 0;
+        }
+        @media (max-width: 1900px) {
+            .text-editors {
+                grid-template-columns: 1fr;
+            }
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .canvas-container {
+                max-width: 100%;
+            }
+        }
+        /* 画布容器 */
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            position: relative;
+            width: 100%;
+            max-width: 1150px;
+            height: auto;
+            max-height: 1500px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        /* 卡片样式 */
+        .card {
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .card-body {
+            padding: 1.25rem;
+            overflow: hidden;
+        }
+        /* 调整主布局中元素的高度 */
+        .controls-container {
+            height: auto;
+            min-height: 800px;
+            overflow-y: auto;
+        }
+        .main-layout {
+            align-items: start;
+        }
+        /* 画布样式 */
+        #canvas {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            /* 基于1080*1990的原始尺寸 */
+            width: 1080px !important;
+            height: 1990px !important;
+        }
+        /* 文字编辑器容器 */
+        .text-editors {
+            margin-bottom: 20px;
+        }
+        /* 编辑器区块 */
+        .editor-section {
+            background-color: white;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e9ecef;
+        }
+        .editor-section h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 8px;
+            text-align: center;
+        }
+        /* 导出设置 */
+        .export-settings {
+            background-color: white;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e9ecef;
+        }
+        .export-settings h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 8px;
+            text-align: center;
+        }
+        /* 控制组布局 */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .control-group label {
+            display: block;
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 3px;
+            font-weight: 500;
+        }
+        .control-group input,
+        .control-group select {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        /* 控制行 */
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .control-row > .control-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        /* 按钮组 */
+        .button-group {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto; /* 推到底部 */
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+        /* 控制面板标题 */
+        .controls-container h2 {
+            text-align: center;
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        /* 颜色选择器 */
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            padding: 2px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        /* 优化滚动条样式 */
+        .controls-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .controls-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .controls-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+        .controls-container::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+        /* 优化文字内容输入框 */
+        #deptContent, #nameContent, #congratsContent, #orderContent, #amountContent {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        /* 优化选择框样式 */
+        select {
+            cursor: pointer;
+            background-color: white;
+        }
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .canvas-container {
+                height: auto;
+            }
+            .controls-container {
+                max-height: none;
+            }
+        }
+        @media (max-width: 768px) {
+            .main-layout {
+                gap: 10px;
+            }
+            .canvas-container {
+                padding: 10px;
+            }
+            #canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    </style><script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script></head><body><div class="container" style="max-width: 1800px;"><h1>喜报生成工具</h1><div class="return-button" style="position: absolute; top: 20px; right: 20px;"><a href="index.html" class="btn btn-secondary btn-sm">返回导航页面</a></div><div class="card mb-4" style="max-height: 80px;"><div class="card-header">
+                上传图片
+            </div><div class="card-body" style="display: flex; align-items: center; padding: 10px;"><input type="file" id="fileInput" accept="image/jpeg,image/png" style="width: 400px; margin-right: 20px; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; height: 38px; box-sizing: border-box;"><p style="flex: 1; margin: 0; text-align: right; display: flex; align-items: center; justify-content: flex-end;">请上传图片，系统将自动定位需要替换的文字区域</p></div></div><div class="main-layout"><div class="controls-container"><h2>文字编辑</h2><div class="text-editors"><div class="editor-section"><h3>1. 头像预览与上传</h3><div class="control-group"><label for="deptFilter">按部门筛选:</label><select id="deptFilter" onchange="filterNamesByDepartment()"><option value="">全部部门</option><option value="销售部">销售部</option><option value="行政部">行政部</option><option value="医疗中心">医疗中心</option><option value="副总经理">副总经理</option></select></div><div class="control-group"><label for="nameFilter">按姓名选择:</label><select id="nameFilter" onchange="if(this.value){document.getElementById('avatarNameInput').value=this.value; previewAvatar();}"><option value="">请选择姓名</option></select></div><div class="control-group"><label for="avatarNameInput">或输入姓名查找:</label><input type="text" id="avatarNameInput" placeholder="请输入姓名"></div><div class="control-row"><div class="control-group" style="flex: 2; display: flex; align-items: center;"><button id="previewAvatarBtn" class="btn btn-secondary" style="width: 100%; padding: 8px; height: 38px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">预览头像</button></div><div class="control-group" style="flex: 2; display: flex; align-items: center;"><button id="confirmAvatarBtn" class="btn btn-primary" style="width: 100%; padding: 8px; height: 38px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;" disabled>确认上传头像</button></div></div><div style="margin: 15px 0; text-align: center;"><div style="display: inline-block; width: 120px; height: 120px; border: 2px dashed #dee2e6; border-radius: 50%; overflow: hidden; position: relative;"><div id="avatarPreviewArea" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;"><span style="color: #6c757d; font-size: 14px;">头像预览</span></div></div></div><div id="avatarTip" style="margin-top: 10px; font-size: 12px; color: #6c757d; text-align: center;"></div></div><div class="editor-section"><h3>2. 头像更新与管理</h3><div class="control-group"><label for="avatarFileInput">上传图片更新/添加头像:</label><input type="file" id="avatarFileInput" accept="image/jpeg,image/png"></div><div class="control-group"><label for="avatarReverseName">姓名:</label><input type="text" id="avatarReverseName" placeholder="请输入姓名"></div><div class="control-group"><label for="avatarReverseDept">部门:</label><select id="avatarReverseDept"><option value="销售部">销售部</option><option value="行政部">行政部</option><option value="医疗中心">医疗中心</option><option value="副总经理">副总经理</option></select></div><div class="control-row"><div class="control-group" style="flex: 1;"><button id="uploadImageWithNameBtn" class="btn btn-success" style="width: 100%;">上传并保存</button></div><div class="control-group" style="flex: 1;"><button id="deletePersonBtn" class="btn btn-danger" style="width: 100%;">删除人员</button></div></div><div class="control-group"><button id="viewAllPersonsBtn" class="btn btn-info" style="width: 100%; margin-top: 10px;">查看所有人员</button></div><div id="personListModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);"><div class="modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; max-height: 80vh; overflow-y: auto;"><div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h4>所有人员名单</h4><span class="close" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span></div><div class="modal-body"><div id="personListContent"></div></div></div></div></div><div class="editor-section"><h3>3. 金额</h3><div class="control-group"><label for="amountContent">文字内容:</label><input type="text" id="amountContent" placeholder="请输入金额"></div><div class="control-row"><div class="control-group"><label for="amountFontFamily">字体:</label><select id="amountFontFamily"><option value="ChuangkitZongYi">创意字体</option><option value="NotoSansSCBlack" selected>黑体</option><option value="NotoSansSCMedium">中等黑体</option></select></div><div class="control-group"><label for="amountFontSize">字号:</label><input type="number" id="amountFontSize" value="170" min="12" max="300"></div><div class="control-group"><label for="amountFontColor">颜色:</label><input type="color" id="amountFontColor" value="#ffb875"></div></div></div><div class="editor-section"><h3>4. 导出设置</h3><div class="control-row"><div class="control-group"><label for="exportWidth">宽度:</label><input type="number" id="exportWidth" value="1080" min="100" max="4000"></div><div class="control-group"><label for="exportHeight">高度:</label><input type="number" id="exportHeight" value="1990" min="100" max="4000"></div></div><div class="control-row" style="margin-top: 15px;"><div class="control-group" style="flex: 1;"><button id="exportBtn" class="btn btn-primary" style="width: 100%;">导出JPG</button></div><div class="control-group" style="flex: 1;"><button id="resetBtn" class="btn btn-danger" style="width: 100%;">重置</button></div></div></div><div class="editor-section"><h3>5. 部门</h3><div class="control-group"><label for="deptContent">文字内容:</label><input type="text" id="deptContent" placeholder="请输入部门" value="销售部"><div style="margin-top: 8px;"><label for="deptPreset">预选部门:</label><select id="deptPreset" onchange="if(this.value){document.getElementById('deptContent').value=this.value; updateTextObject('dept'); this.value='';}"><option value="">请选择</option><option value="销售部">销售部</option><option value="行政部">行政部</option><option value="医疗中心">医疗中心</option><option value="总经理">总经理</option><option value="副总经理">副总经理</option></select></div></div><div class="control-row"><div class="control-group"><label for="deptFontFamily">字体:</label><select id="deptFontFamily"><option value="ChuangkitZongYi">创意字体</option><option value="NotoSansSCBlack" selected>黑体</option><option value="NotoSansSCMedium">中等黑体</option></select></div><div class="control-group"><label for="deptFontSize">字号:</label><input type="number" id="deptFontSize" value="48" min="12" max="200"></div><div class="control-group"><label for="deptFontColor">颜色:</label><input type="color" id="deptFontColor" value="#fff2eb"></div></div></div><div class="editor-section"><h3>6. 姓名</h3><div class="control-group"><label for="nameContent">文字内容:</label><input type="text" id="nameContent" placeholder="请输入姓名" oninput="updateCongratsText()"></div><div class="control-row"><div class="control-group"><label for="nameFontFamily">字体:</label><select id="nameFontFamily"><option value="ChuangkitZongYi">创意字体</option><option value="NotoSansSCBlack" selected>黑体</option><option value="NotoSansSCMedium">中等黑体</option></select></div><div class="control-group"><label for="nameFontSize">字号:</label><input type="number" id="nameFontSize" value="40" min="12" max="200"></div><div class="control-group"><label for="nameFontColor">颜色:</label><input type="color" id="nameFontColor" value="#fff2eb"></div></div></div><div class="editor-section"><h3>7. 恭喜</h3><div class="control-group"><label for="congratsContent">文字内容:</label><input type="text" id="congratsContent" placeholder="请输入恭喜语"></div><div class="control-row"><div class="control-group"><label for="congratsFontFamily">字体:</label><select id="congratsFontFamily"><option value="ChuangkitZongYi">创意字体</option><option value="NotoSansSCBlack">黑体</option><option value="NotoSansSCMedium" selected>中等黑体</option></select></div><div class="control-group"><label for="congratsFontSize">字号:</label><input type="number" id="congratsFontSize" value="42" min="12" max="300"></div><div class="control-group"><label for="congratsFontColor">颜色:</label><input type="color" id="congratsFontColor" value="#9f0913"></div></div></div><div class="editor-section"><h3>8. 下单</h3><div class="control-group"><label for="orderContent">文字内容:</label><input type="text" id="orderContent" placeholder="请输入下单信息" value="开门红套餐下单"></div><div class="control-row"><div class="control-group"><label for="orderFontFamily">字体:</label><select id="orderFontFamily"><option value="ChuangkitZongYi">创意字体</option><option value="NotoSansSCBlack" selected>黑体</option><option value="NotoSansSCMedium">中等黑体</option></select></div><div class="control-group"><label for="orderFontSize">字号:</label><input type="number" id="orderFontSize" value="48" min="12" max="200"></div><div class="control-group"><label for="orderFontColor">颜色:</label><input type="color" id="orderFontColor" value="#80090d"></div></div></div></div></div><div class="canvas-wrapper"><div class="card mb-4"><div class="card-header">
+                预览效果
+                </div><div class="card-body"><div class="canvas-container"><canvas id="canvas" width="1080" height="1990"></canvas></div></div></div></div></div></div><script>
+        // 文字区域坐标定义
+        const TEXT_AREAS = {
+            dept: { x: 966, y: 500, width: 80, height: 300 }, // 部门：竖排文字
+            name: { x: 898, y: 505, width: 80, height: 200 }, // 姓名：竖排文字，定位点110*1272
+            congrats: { x: 110, y: 1272, width: 880, height: 150 }, // 恭喜：定位点110*1272
+            order: { x: 100, y: 1400, width: 880, height: 100 }, // 下单：垂直居中，y坐标1400px
+            amount: { x: 100, y: 1550, width: 880, height: 150 } // 金额：垂直居中，y坐标1550px
+        };
+        // 人员名单映射（姓名 -> 部门）
+        const PERSONNEL_MAP = {
+            // 管理层
+            '范宏云': '副总经理',
+            // 行政部
+            '朱甦雅': '行政部',
+            '王斌斌': '行政部',
+            '杜永丽': '行政部',
+            '张巧花': '行政部',
+            // 销售部
+            '史正蓓': '销售部',
+            '陈炳森': '销售部',
+            '白金玉': '销售部',
+            '王莉莉': '销售部',
+            '董博': '销售部',
+            '王佳': '销售部',
+            '刘倩倩': '销售部',
+            // 医疗中心
+            '苏丹': '医疗中心',
+            '曹娟': '医疗中心',
+            '张改霞': '医疗中心',
+            '李雨婷': '医疗中心',
+            '赵改过': '医疗中心',
+            '张英玲': '医疗中心',
+            '胡立茹': '医疗中心',
+            '杨晓昭': '医疗中心',
+            '王烁楠': '医疗中心',
+            '朱丹': '医疗中心',
+            '朱英': '医疗中心',
+            '胡秀娥': '医疗中心',
+            '韩万忠': '医疗中心',
+            '郭锦霞': '医疗中心',
+            '程芸': '医疗中心',
+            '张文慧': '医疗中心',
+            '王倩倩': '医疗中心',
+            '孙悦': '医疗中心',
+            '郑晓燕': '医疗中心',
+            '魏霞': '医疗中心',
+            '姚建强': '医疗中心',
+            '潘雨萍': '医疗中心',
+            '朱艳丽': '医疗中心',
+            '董凯雨': '医疗中心',
+            '张鹤廷': '医疗中心',
+            '孙绿萍': '医疗中心',
+            '刘丹丹': '医疗中心',
+            '张丽娟': '医疗中心',
+            '邵倩': '医疗中心',
+            '王晓霞': '医疗中心',
+            '党江娟': '医疗中心',
+            '刘沛': '医疗中心',
+            '周娜': '医疗中心',
+            '姜媛媛': '医疗中心',
+            '苏巧燕': '医疗中心',
+            '杨文娟': '医疗中心'
+        };
+        // 存储当前预览的头像信息
+        let currentPreviewAvatar = null;
+        // 存储上传的头像数据（姓名 -> 头像DataURL）
+        let uploadedAvatars = {};
+        // GitHub API 配置
+        const GITHUB_CONFIG = {
+            owner: 'Nmfengtongxue',
+            repo: 'daily_imgs',
+            branch: 'main',
+            token: '' // 请在此处输入有效的GitHub个人访问令牌
+        };
+        // 全局变量
+        let canvas; // Fabric.js画布实例
+        let backgroundImage = null; // 背景图片对象
+        let textObjects = {}; // 文字对象集合
+        
+        // 从localStorage恢复数据
+        function loadFromLocalStorage() {
+            // 恢复PERSONNEL_MAP
+            const savedPersonnelMap = localStorage.getItem('personnelMap');
+            if (savedPersonnelMap) {
+                Object.assign(PERSONNEL_MAP, JSON.parse(savedPersonnelMap));
+            }
+            
+            // 恢复uploadedAvatars
+            const savedAvatars = localStorage.getItem('uploadedAvatars');
+            if (savedAvatars) {
+                uploadedAvatars = JSON.parse(savedAvatars);
+            }
+        }
+        /**
+         * 初始化Fabric.js画布
+         */
+        function initCanvas() {
+            canvas = new fabric.Canvas('canvas', {
+                backgroundColor: '#ffffff',
+                preserveObjectStacking: true
+            });
+        }
+        /**
+         * 处理文件上传
+         * @param {File} file - 上传的图片文件
+         */
+        function handleFileUpload(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // 加载图片到画布
+                fabric.Image.fromURL(e.target.result, function(img) {
+                    // 保持原始宽高比例，调整图片大小以适应391x391的圆形区域
+                    const maxSize = 391;
+                    
+                    // 计算缩放比例，确保图片完全适应圆形区域
+                    const scaleX = maxSize / img.width;
+                    const scaleY = maxSize / img.height;
+                    const scale = Math.min(scaleX, scaleY);
+                    
+                    // 使用统一的缩放比例，保持原始宽高比例
+                    img.scale(scale);
+                    
+                    // 创建圆形裁剪区域
+                    const radius = maxSize / 2;
+                    // 设置图片位置：画布中央，y坐标790px
+                    const canvasCenterX = canvas.width / 2;
+                    img.set({
+                        left: canvasCenterX,
+                        top: 790,
+                        originX: 'center',
+                        originY: 'center',
+                        clipTo: function(ctx) {
+                            // 保存当前状态
+                            ctx.save();
+                            // 确保路径外的区域透明
+                            ctx.globalCompositeOperation = 'destination-in';
+                            // 绘制圆形路径
+                            ctx.arc(0, 0, radius, 0, Math.PI * 2, false);
+                            ctx.fill();
+                            // 恢复状态
+                            ctx.restore();
+                        },
+                        selectable: true, // 允许拖拽移动
+                        evented: true
+                    });
+                    // 移除之前可能存在的圆形图片
+                    const objects = canvas.getObjects();
+                    for (let i = objects.length - 1; i >= 0; i--) {
+                        if (objects[i].clipTo) {
+                            canvas.remove(objects[i]);
+                        }
+                    }
+                    // 添加圆形图片到画布
+                    // 确保图片在顶层的下一层
+                    if (objects.length > 0) {
+                        // 移除所有对象
+                        canvas.clear();
+                        // 重新添加背景图片（6.jpg）
+                        canvas.add(backgroundImage);
+                        // 添加上传的圆形图片
+                        canvas.add(img);
+                        // 重新添加顶层图片（7.png）
+                        loadImageFromGitHub('7.png').then(topImageUrl => {
+                            if (topImageUrl) {
+                                fabric.Image.fromURL(topImageUrl, function(topImg) {
+                                    // 调整图片大小以适应画布
+                                    topImg.scaleToWidth(canvas.width);
+                                    topImg.scaleToHeight(canvas.height);
+                                    // 设置图片不可拖拽移动
+                                    topImg.selectable = false;
+                                    topImg.evented = false;
+                                    // 添加顶层图片
+                                    canvas.add(topImg);
+                                    // 重新添加文字对象
+                                    addTextObjects();
+                                    // 渲染画布
+                                    canvas.renderAll();
+                                    console.log('圆形图片已添加完成，层级在顶层的下一层');
+                                }, {
+                                    crossOrigin: 'anonymous', // 解决画布污染问题
+                                    onError: function(err) {
+                                        console.error('加载顶层图片失败:', err);
+                                    }
+                                });
+                            } else {
+                                console.error('无法获取顶层图片URL');
+                            }
+                        });
+                        // 重新设置默认文字值，但保持当前的部门和姓名
+                        setTimeout(function() {
+                            const currentName = document.getElementById('nameContent').value;
+                            const currentDept = document.getElementById('deptContent').value;
+                            
+                            // 只重置订单内容，保持部门和姓名不变
+                            document.getElementById('orderContent').value = '开门红套餐下单';
+                            
+                            // 确保部门和姓名仍然正确
+                            if (currentName) {
+                                document.getElementById('nameContent').value = currentName;
+                            }
+                            if (currentDept) {
+                                document.getElementById('deptContent').value = currentDept;
+                            }
+                            
+                            Object.keys(TEXT_AREAS).forEach(key => {
+                                updateTextObject(key);
+                            });
+                        }, 100);
+                    } else {
+                        canvas.add(img);
+                        canvas.renderAll();
+                    }
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+        /**
+         * 添加所有文字对象到画布
+         */
+        function addTextObjects() {
+            // 清除现有文字对象
+            Object.values(textObjects).forEach(obj => canvas.remove(obj));
+            textObjects = {};
+            // 创建部门文字 - 竖排（从上到下）
+            textObjects.dept = new fabric.Text('', {
+                left: TEXT_AREAS.dept.x + TEXT_AREAS.dept.width / 2,
+                top: TEXT_AREAS.dept.y,
+                fontSize: 48,
+                fontFamily: 'NotoSansSCBlack',
+                fill: '#fff2eb',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                originX: 'center',
+                originY: 'top',
+                lineHeight: 58/48 // 字间距10px
+            });
+            // 创建姓名文字 - 竖排（从上到下）
+            textObjects.name = new fabric.Text('', {
+                left: TEXT_AREAS.name.x + TEXT_AREAS.name.width / 2,
+                top: TEXT_AREAS.name.y,
+                fontSize: 40,
+                fontFamily: 'NotoSansSCBlack',
+                fill: '#fff2eb',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                originX: 'center',
+                originY: 'top',
+                lineHeight: 50/40, // 字间距10px
+                shadow: new fabric.Shadow({
+                    color: 'rgba(0,0,0,0.3)',
+                    blur: 5,
+                    offsetX: 2,
+                    offsetY: 2
+                })
+            });
+            // 创建恭喜文字
+            textObjects.congrats = new fabric.Text('', {
+                left: TEXT_AREAS.congrats.x,
+                top: TEXT_AREAS.congrats.y,
+                fontSize: 42,
+                fontFamily: 'NotoSansSCMedium',
+                fill: '#9f0913', // 默认颜色#9f0913
+                fontWeight: 'bold',
+                textAlign: 'left',
+                originX: 'left',
+                originY: 'top',
+                shadow: new fabric.Shadow({
+                    color: 'rgba(0,0,0,0.3)',
+                    blur: 8,
+                    offsetX: 3,
+                    offsetY: 3
+                })
+            });
+            // 创建下单文字 - 垂直居中
+            textObjects.order = new fabric.Text('', {
+                left: TEXT_AREAS.order.x + TEXT_AREAS.order.width / 2,
+                top: TEXT_AREAS.order.y,
+                fontSize: 48,
+                fontFamily: 'ChuangkitZongYi',
+                fill: '#80090d', // 默认颜色#80090d
+                fontWeight: 'bold',
+                textAlign: 'center',
+                originX: 'center',
+                originY: 'middle', // 垂直居中对齐
+                shadow: new fabric.Shadow({
+                    color: 'rgba(0,0,0,0.3)',
+                    blur: 5,
+                    offsetX: 2,
+                    offsetY: 2
+                })
+            });
+            // 创建金额文字 - 垂直居中
+            textObjects.amount = new fabric.Text('', {
+                left: TEXT_AREAS.amount.x + TEXT_AREAS.amount.width / 2,
+                top: TEXT_AREAS.amount.y,
+                fontSize: 170,
+                fontFamily: 'NotoSansSCBlack',
+                fill: '#ffb875', // 默认颜色#ffb875
+                fontWeight: 'bold',
+                textAlign: 'center',
+                originX: 'center',
+                originY: 'middle', // 垂直居中对齐
+                shadow: new fabric.Shadow({
+                    color: 'rgba(0,0,0,0.4)',
+                    blur: 10,
+                    offsetX: 4,
+                    offsetY: 4
+                })
+            });
+            // 添加所有文字对象到画布
+            Object.values(textObjects).forEach(obj => canvas.add(obj));
+        }
+        /**
+         * 更新指定的文字对象
+         * @param {string} key - 文字对象的键名
+         */
+        function updateTextObject(key) {
+            if (!textObjects[key]) return;
+            // 获取输入值
+            let content = document.getElementById(`${key}Content`).value;
+            const fontFamily = document.getElementById(`${key}FontFamily`).value;
+            const fontSize = parseInt(document.getElementById(`${key}FontSize`).value);
+            const fontColor = document.getElementById(`${key}FontColor`).value;
+            if (key === 'dept' || key === 'name') {
+                // 部门和姓名文字特殊处理 - 竖排从上到下
+                // 通过在每个字符之间添加换行符实现竖排
+                content = content.split('').join('\n');
+                // 计算行高，实现10px字间距
+                const lineHeight = (fontSize + 10) / fontSize;
+                textObjects[key].set({
+                    text: content,
+                    fontFamily: fontFamily,
+                    fontSize: fontSize,
+                    fill: fontColor,
+                    textAlign: 'center',
+                    lineHeight: lineHeight // 字间距10px
+                });
+            } else {
+                // 其他文字正常处理
+                textObjects[key].set({
+                    text: content,
+                    fontFamily: fontFamily,
+                    fontSize: fontSize,
+                    fill: fontColor
+                });
+            }
+            canvas.renderAll();
+        }
+        /**
+         * 导出为JPG图片
+         */
+        function exportToJPG() {
+            if (!backgroundImage) {
+                alert('请先上传图片');
+                return;
+            }
+            // 获取导出尺寸
+            const exportWidth = parseInt(document.getElementById('exportWidth').value);
+            const exportHeight = parseInt(document.getElementById('exportHeight').value);
+            // 创建临时画布用于导出
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = exportWidth;
+            tempCanvas.height = exportHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            // 绘制背景图片
+            tempCtx.drawImage(canvas.lowerCanvasEl, 0, 0, exportWidth, exportHeight);
+            // 将Canvas转换为图片并下载
+            tempCanvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'result.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 'image/jpeg', 0.9);
+        }
+        /**
+         * 重置画布
+         * 功能：清空画布，重置背景图片和文字对象，清空输入框
+         */
+        function resetCanvas() {
+            canvas.clear();
+            backgroundImage = null;
+            textObjects = {};
+            // 清空输入框
+            Object.keys(TEXT_AREAS).forEach(key => {
+                document.getElementById(`${key}Content`).value = '';
+            });
+        }
+        /**
+         * 更新恭喜文字
+         * 当姓名输入框内容变化时自动调用
+         */
+        function updateCongratsText() {
+            const name = document.getElementById('nameContent').value;
+            const congratsInput = document.getElementById('congratsContent');
+            if (name) {
+                congratsInput.value = `恭喜：${name}`;
+                updateTextObject('congrats');
+            } else {
+                congratsInput.value = '';
+                updateTextObject('congrats');
+            }
+        }
+        /**
+         * 处理键盘事件，实现文字对象的方向键微调
+         * @param {KeyboardEvent} e - 键盘事件对象
+         */
+        function handleKeydown(e) {
+            // 检查是否有选中的对象
+            const activeObject = canvas.getActiveObject();
+            if (!activeObject) return;
+            // 检查是否是文字对象
+            if (activeObject.type !== 'i-text' && activeObject.type !== 'text') return;
+            // 定义微调步长
+            const step = 5;
+            // 阻止默认行为，防止页面滚动
+            e.preventDefault();
+            // 根据按下的方向键调整文字位置
+            switch (e.key) {
+                case 'ArrowUp':
+                    activeObject.set('top', activeObject.top - step);
+                    break;
+                case 'ArrowDown':
+                    activeObject.set('top', activeObject.top + step);
+                    break;
+                case 'ArrowLeft':
+                    activeObject.set('left', activeObject.left - step);
+                    break;
+                case 'ArrowRight':
+                    activeObject.set('left', activeObject.left + step);
+                    break;
+                default:
+                    return;
+            }
+            // 重新渲染画布
+            canvas.renderAll();
+            // 更新坐标显示
+            updateCoordinateDisplay(activeObject);
+        }
+        /**
+         * 更新坐标显示
+         * @param {Object} obj - 选中的对象
+         */
+        function updateCoordinateDisplay(obj) {
+            // 创建或更新坐标显示元素
+            let coordDisplay = document.getElementById('coordinateDisplay');
+            if (!coordDisplay) {
+                coordDisplay = document.createElement('div');
+                coordDisplay.id = 'coordinateDisplay';
+                coordDisplay.style.position = 'fixed';
+                coordDisplay.style.bottom = '10px';
+                coordDisplay.style.left = '10px';
+                coordDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                coordDisplay.style.color = 'white';
+                coordDisplay.style.padding = '8px 12px';
+                coordDisplay.style.borderRadius = '4px';
+                coordDisplay.style.fontSize = '12px';
+                coordDisplay.style.zIndex = '1000';
+                document.body.appendChild(coordDisplay);
+            }
+            // 更新坐标信息
+            coordDisplay.textContent = `X: ${Math.round(obj.left)}, Y: ${Math.round(obj.top)}`;
+        }
+        /**
+         * 初始化事件监听
+         */
+        function initEventListeners() {
+            // 文件上传事件
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFileUpload(file);
+                }
+            });
+            // 按钮事件
+            document.getElementById('exportBtn').addEventListener('click', exportToJPG);
+            document.getElementById('resetBtn').addEventListener('click', resetCanvas);
+            // 实时更新各个文字对象
+            Object.keys(TEXT_AREAS).forEach(key => {
+                document.getElementById(`${key}Content`).addEventListener('input', () => updateTextObject(key));
+                document.getElementById(`${key}FontFamily`).addEventListener('change', () => updateTextObject(key));
+                document.getElementById(`${key}FontSize`).addEventListener('input', () => updateTextObject(key));
+                document.getElementById(`${key}FontColor`).addEventListener('input', () => updateTextObject(key));
+            });
+            // 键盘事件监听，实现方向键微调
+            document.addEventListener('keydown', handleKeydown);
+            // 画布对象选择事件，更新坐标显示
+            canvas.on('selection:created', function(e) {
+                updateCoordinateDisplay(e.selected[0]);
+            });
+            // 画布对象移动事件，更新坐标显示
+            canvas.on('object:moving', function(e) {
+                updateCoordinateDisplay(e.target);
+            });
+            
+            // 初始化姓名下拉列表
+            initNameDropdown();
+            // 头像管理功能事件监听
+            // 预览头像按钮
+            document.getElementById('previewAvatarBtn').addEventListener('click', previewAvatar);
+            // 确认上传头像按钮
+            document.getElementById('confirmAvatarBtn').addEventListener('click', uploadAvatarToCanvas);
+            // 上传图片并设置姓名按钮
+            document.getElementById('uploadImageWithNameBtn').addEventListener('click', uploadImageWithName);
+            // 删除人员按钮
+            document.getElementById('deletePersonBtn').addEventListener('click', deletePerson);
+            // 查看所有人员按钮
+            document.getElementById('viewAllPersonsBtn').addEventListener('click', viewAllPersons);
+            // 关闭模态框按钮
+            document.querySelector('.close').addEventListener('click', function() {
+                document.getElementById('personListModal').style.display = 'none';
+            });
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('personListModal');
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        /**
+         * 预览头像
+         */
+        function previewAvatar() {
+            const nameInput = document.getElementById('avatarNameInput').value.trim();
+            const previewArea = document.getElementById('avatarPreviewArea');
+            const confirmBtn = document.getElementById('confirmAvatarBtn');
+            const avatarTip = document.getElementById('avatarTip');
+            
+            // 清空原有状态
+            previewArea.innerHTML = '';
+            confirmBtn.disabled = true;
+            avatarTip.textContent = '';
+            currentPreviewAvatar = null;
+            
+            // 校验姓名
+            if (!nameInput) {
+                avatarTip.textContent = '请输入姓名！';
+                return;
+            }
+            
+            // 检查是否在人员名单中
+            if (!PERSONNEL_MAP.hasOwnProperty(nameInput)) {
+                avatarTip.textContent = `暂无【${nameInput}】的信息，请检查姓名！`;
+                return;
+            }
+            
+            // 首先检查是否有上传的头像数据
+            if (uploadedAvatars.hasOwnProperty(nameInput)) {
+                // 使用上传的头像数据
+                const img = new Image();
+                img.onload = function() {
+                    // 检查图片是否有效（非空）
+                    if (img.width === 0 || img.height === 0) {
+                        // 图片为空，尝试从GitHub加载
+                        tryLoadGitHubAvatar();
+                    } else {
+                        // 显示预览
+                        previewArea.innerHTML = '';
+                        previewArea.appendChild(img);
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        
+                        // 启用确认按钮
+                        confirmBtn.disabled = false;
+                        
+                        // 存储当前预览的头像信息
+                        currentPreviewAvatar = {
+                            name: nameInput,
+                            dept: PERSONNEL_MAP[nameInput],
+                            image: img
+                        };
+                        
+                        // 显示提示
+                        avatarTip.textContent = `找到【${nameInput}】的信息（本地存储），部门：${PERSONNEL_MAP[nameInput]}`;
+                        avatarTip.style.color = '#28a745';
+                        
+                        // 自动填充姓名和部门
+                        document.getElementById('nameContent').value = nameInput;
+                        document.getElementById('deptContent').value = PERSONNEL_MAP[nameInput];
+                        updateTextObject('name');
+                        updateTextObject('dept');
+                        updateCongratsText();
+                    }
+                };
+                
+                img.onerror = function() {
+                    // 本地存储的头像加载失败，尝试从GitHub加载
+                    tryLoadGitHubAvatar();
+                };
+                
+                // 尝试加载本地存储的头像
+                img.src = uploadedAvatars[nameInput];
+                return;
+            }
+            
+            // 尝试从GitHub加载不同格式的头像文件
+            function tryLoadGitHubAvatar() {
+                const extensions = ['.jpg', '.png', '.jpeg', '.gif', '.webp'];
+                let currentExtensionIndex = 0;
+            
+                function tryLoadAvatar(extensionIndex) {
+                    if (extensionIndex >= extensions.length) {
+                        // 所有格式都尝试失败
+                        previewArea.innerHTML = '<span style="color: #6c757d; font-size: 14px;">头像未找到</span>';
+                        avatarTip.textContent = `未找到【${nameInput}】的头像图片，请使用"上传并保存"功能！`;
+                        avatarTip.style.color = '#ffc107';
+                        // 禁用确认按钮
+                        confirmBtn.disabled = true;
+                        // 清除当前预览的头像信息
+                        currentPreviewAvatar = null;
+                        return;
+                    }
+                    
+                    const extension = extensions[extensionIndex];
+                    const filePath = `2026-01-31 人员名单照片/${nameInput}${extension}`;
+                    const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeURIComponent(filePath)}`;
+                    
+                    // 使用GitHub API获取文件
+                    fetch(apiUrl, {
+                        headers: {
+                            'Authorization': `token ${GITHUB_CONFIG.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            // 当前格式不存在，尝试下一个格式
+                            tryLoadAvatar(extensionIndex + 1);
+                            return;
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.content) {
+                            // 解码Base64内容
+                            const imageUrl = `data:image/png;base64,${data.content}`;
+                            const img = new Image();
+                            
+                            img.onload = function() {
+                                // 显示预览
+                                previewArea.innerHTML = '';
+                                previewArea.appendChild(img);
+                                img.style.width = '100%';
+                                img.style.height = '100%';
+                                img.style.objectFit = 'cover';
+                                
+                                // 启用确认按钮
+                                confirmBtn.disabled = false;
+                                
+                                // 存储当前预览的头像信息
+                                currentPreviewAvatar = {
+                                    name: nameInput,
+                                    dept: PERSONNEL_MAP[nameInput],
+                                    image: img
+                                };
+                                
+                                // 显示提示
+                                avatarTip.textContent = `找到【${nameInput}】的信息（GitHub），部门：${PERSONNEL_MAP[nameInput]}`;
+                                avatarTip.style.color = '#28a745';
+                                
+                                // 自动填充姓名和部门
+                                document.getElementById('nameContent').value = nameInput;
+                                document.getElementById('deptContent').value = PERSONNEL_MAP[nameInput];
+                                updateTextObject('name');
+                                updateTextObject('dept');
+                                updateCongratsText();
+                            };
+                            
+                            img.onerror = function() {
+                                // 图片加载失败，尝试下一个格式
+                                tryLoadAvatar(extensionIndex + 1);
+                            };
+                            
+                            img.src = imageUrl;
+                        } else {
+                            // 无内容，尝试下一个格式
+                            tryLoadAvatar(extensionIndex + 1);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('GitHub API请求失败:', error);
+                        // API请求失败，尝试下一个格式
+                        tryLoadAvatar(extensionIndex + 1);
+                    });
+                }
+                
+                // 开始尝试加载头像
+                tryLoadAvatar(currentExtensionIndex);
+            }
+            
+            // 开始尝试从GitHub加载头像
+            tryLoadGitHubAvatar();
+        }
+        
+        /**
+         * 上传头像到画布
+         */
+        function uploadAvatarToCanvas() {
+            if (!currentPreviewAvatar) {
+                document.getElementById('avatarTip').textContent = '请先预览有效头像！';
+                document.getElementById('avatarTip').style.color = '#dc3545';
+                return;
+            }
+            
+            const { name, dept, image } = currentPreviewAvatar;
+            
+            // 检查图片是否有效
+            if (!image || image.width === 0 || image.height === 0) {
+                document.getElementById('avatarTip').textContent = '预览的头像图片无效！';
+                document.getElementById('avatarTip').style.color = '#dc3545';
+                return;
+            }
+            
+            // 直接使用原始图片URL创建文件对象，避免重新绘制导致的变形
+            fetch(image.src)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], `${name}.png`, { type: blob.type });
+                    handleFileUpload(file);
+                    
+                    // 显示成功提示
+                    document.getElementById('avatarTip').textContent = `【${name}】的头像已上传到画布！`;
+                    document.getElementById('avatarTip').style.color = '#28a745';
+                })
+                .catch(error => {
+                    console.error('获取头像文件失败:', error);
+                    document.getElementById('avatarTip').textContent = '获取头像文件失败！';
+                    document.getElementById('avatarTip').style.color = '#dc3545';
+                });
+        }
+        
+        /**
+         * 初始化姓名下拉列表
+         */
+        function initNameDropdown() {
+            const nameFilter = document.getElementById('nameFilter');
+            const names = Object.keys(PERSONNEL_MAP).sort((a, b) => {
+                // 按拼音首字母排序
+                return a.localeCompare(b, 'zh-CN', { sensitivity: 'accent' });
+            });
+            
+            // 清空现有选项
+            nameFilter.innerHTML = '<option value="">请选择姓名</option>';
+            
+            // 添加排序后的姓名选项
+            names.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                nameFilter.appendChild(option);
+            });
+        }
+        
+        /**
+         * 按部门筛选姓名
+         */
+        function filterNamesByDepartment() {
+            const deptFilter = document.getElementById('deptFilter');
+            const nameFilter = document.getElementById('nameFilter');
+            const selectedDept = deptFilter.value;
+            
+            // 清空现有选项
+            nameFilter.innerHTML = '<option value="">请选择姓名</option>';
+            
+            // 筛选并排序姓名
+            const filteredNames = Object.keys(PERSONNEL_MAP).filter(name => {
+                return !selectedDept || PERSONNEL_MAP[name] === selectedDept;
+            }).sort((a, b) => {
+                // 按拼音首字母排序
+                return a.localeCompare(b, 'zh-CN', { sensitivity: 'accent' });
+            });
+            
+            // 添加筛选后的姓名选项
+            filteredNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                nameFilter.appendChild(option);
+            });
+        }
+        
+        /**
+         * 上传图片到GitHub仓库
+         */
+        function uploadToGitHub(base64Data, fileName, fileType) {
+            const filePath = `2026-01-31 人员名单照片/${fileName}.png`;
+            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeURIComponent(filePath)}`;
+            
+            // 处理Base64数据，去除前缀
+            const cleanBase64 = base64Data.split(',')[1];
+            
+            // 构建API请求
+            return fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_CONFIG.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Update avatar for ${fileName}`,
+                    content: cleanBase64,
+                    branch: GITHUB_CONFIG.branch
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.content) {
+                    console.log('上传到GitHub成功:', data.content.html_url);
+                    return true;
+                } else {
+                    console.error('上传到GitHub失败:', data);
+                    return false;
+                }
+            })
+            .catch(error => {
+                console.error('GitHub API请求失败:', error);
+                return false;
+            });
+        }
+        
+        /**
+         * 从GitHub删除头像
+         */
+        function deleteFromGitHub(fileName) {
+            const filePath = `2026-01-31 人员名单照片/${fileName}.png`;
+            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeURIComponent(filePath)}`;
+            
+            // 先获取文件的sha值
+            return fetch(apiUrl, {
+                headers: {
+                    'Authorization': `token ${GITHUB_CONFIG.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('获取文件信息失败:', response.status);
+                    return false;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.sha) {
+                    // 执行删除操作
+                    return fetch(apiUrl, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `token ${GITHUB_CONFIG.token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Delete avatar for ${fileName}`,
+                            sha: data.sha,
+                            branch: GITHUB_CONFIG.branch
+                        })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('从GitHub删除成功');
+                            return true;
+                        } else {
+                            console.error('从GitHub删除失败:', response.status);
+                            return false;
+                        }
+                    });
+                } else {
+                    console.error('文件不存在或无sha值');
+                    return false;
+                }
+            })
+            .catch(error => {
+                console.error('GitHub API请求失败:', error);
+                return false;
+            });
+        }
+        
+        /**
+         * 上传图片并保存人员信息
+         */
+        function uploadImageWithName() {
+            const fileInput = document.getElementById('avatarFileInput');
+            const nameInput = document.getElementById('avatarReverseName').value.trim();
+            const deptInput = document.getElementById('avatarReverseDept').value;
+            const avatarTip = document.getElementById('avatarTip');
+            
+            // 校验
+            if (!fileInput.files || fileInput.files.length === 0) {
+                avatarTip.textContent = '请选择要上传的图片！';
+                avatarTip.style.color = '#dc3545';
+                return;
+            }
+            
+            if (!nameInput) {
+                avatarTip.textContent = '请输入姓名！';
+                avatarTip.style.color = '#dc3545';
+                return;
+            }
+            
+            // 保存到PERSONNEL_MAP
+            PERSONNEL_MAP[nameInput] = deptInput;
+            
+            // 重新初始化姓名下拉列表
+            initNameDropdown();
+            
+            // 保存PERSONNEL_MAP到localStorage
+            localStorage.setItem('personnelMap', JSON.stringify(PERSONNEL_MAP));
+            
+            // 处理文件上传
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    // 显示预览
+                    const previewArea = document.getElementById('avatarPreviewArea');
+                    previewArea.innerHTML = '';
+                    previewArea.style.backgroundColor = '#f8f9fa';
+                    
+                    const imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.style.width = '100%';
+                    imgElement.style.height = '100%';
+                    imgElement.style.objectFit = 'cover';
+                    previewArea.appendChild(imgElement);
+                    
+                    // 启用确认按钮
+                    document.getElementById('confirmAvatarBtn').disabled = false;
+                    
+                    // 存储当前预览的头像信息
+                    currentPreviewAvatar = {
+                        name: nameInput,
+                        url: e.target.result
+                    };
+                    
+                    // 保存头像数据到uploadedAvatars
+                    uploadedAvatars[nameInput] = e.target.result;
+                    // 保存uploadedAvatars到localStorage
+                    localStorage.setItem('uploadedAvatars', JSON.stringify(uploadedAvatars));
+                    
+                    // 上传到GitHub仓库
+                    const githubSuccess = await uploadToGitHub(e.target.result, nameInput, file.type);
+                    
+                    // 更新提示
+                    if (githubSuccess) {
+                        avatarTip.textContent = `已上传图片并保存姓名【${nameInput}】，部门: ${deptInput}（已同步到GitHub）`;
+                    } else {
+                        avatarTip.textContent = `已上传图片并保存姓名【${nameInput}】，部门: ${deptInput}（本地存储，GitHub同步失败）`;
+                    }
+                    avatarTip.style.color = '#28a745';
+                    
+                    // 自动填充姓名和部门
+                    document.getElementById('nameContent').value = nameInput;
+                    document.getElementById('deptContent').value = deptInput;
+                    
+                    // 更新画布文字
+                    updateTextObject('name');
+                    updateTextObject('dept');
+                    updateCongratsText();
+                };
+                img.onerror = function() {
+                    avatarTip.textContent = '图片加载失败，请重试！';
+                    avatarTip.style.color = '#dc3545';
+                };
+                img.src = e.target.result;
+            };
+            
+            reader.onerror = function() {
+                avatarTip.textContent = '文件读取失败，请重试！';
+                avatarTip.style.color = '#dc3545';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        /**
+         * 删除人员
+         */
+        async function deletePerson() {
+            const nameInput = document.getElementById('avatarNameInput').value.trim();
+            const avatarTip = document.getElementById('avatarTip');
+            
+            if (!nameInput) {
+                avatarTip.textContent = '请输入要删除的人员姓名！';
+                avatarTip.style.color = '#dc3545';
+                return;
+            }
+            
+            if (PERSONNEL_MAP.hasOwnProperty(nameInput)) {
+                delete PERSONNEL_MAP[nameInput];
+                // 同时从uploadedAvatars中删除
+                if (uploadedAvatars.hasOwnProperty(nameInput)) {
+                    delete uploadedAvatars[nameInput];
+                    // 更新localStorage中的uploadedAvatars
+                    localStorage.setItem('uploadedAvatars', JSON.stringify(uploadedAvatars));
+                }
+                // 从GitHub仓库删除头像
+                const githubSuccess = await deleteFromGitHub(nameInput);
+                // 更新localStorage中的PERSONNEL_MAP
+                localStorage.setItem('personnelMap', JSON.stringify(PERSONNEL_MAP));
+                // 重新初始化姓名下拉列表
+                initNameDropdown();
+                // 清空输入
+                document.getElementById('avatarNameInput').value = '';
+                document.getElementById('avatarPreviewArea').innerHTML = '<span style="color: #6c757d; font-size: 14px;">头像预览</span>';
+                document.getElementById('confirmAvatarBtn').disabled = true;
+                currentPreviewAvatar = null;
+                // 更新提示
+                if (githubSuccess) {
+                    avatarTip.textContent = `已成功删除人员【${nameInput}】（已从GitHub删除）`;
+                } else {
+                    avatarTip.textContent = `已成功删除人员【${nameInput}】（本地删除，GitHub同步失败）`;
+                }
+                avatarTip.style.color = '#28a745';
+            } else {
+                avatarTip.textContent = `未找到人员【${nameInput}】`;
+                avatarTip.style.color = '#dc3545';
+            }
+        }
+        
+        // 使用GitHub API加载仓库中的图片
+        function loadImageFromGitHub(filePath) {
+            if (!GITHUB_CONFIG.token) {
+                console.error('错误：请在GITHUB_CONFIG中配置有效的GitHub个人访问令牌');
+                alert('错误：请在GITHUB_CONFIG中配置有效的GitHub个人访问令牌');
+                return Promise.resolve(null);
+            }
+            
+            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeURIComponent(filePath)}`;
+            console.log('尝试从GitHub加载图片:', filePath, 'API URL:', apiUrl);
+            
+            return fetch(apiUrl, {
+                headers: {
+                    'Authorization': `token ${GITHUB_CONFIG.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => {
+                console.log('GitHub API响应状态:', response.status);
+                if (!response.ok) {
+                    console.error('GitHub API请求失败:', response.status);
+                    // 尝试获取错误详情
+                    return response.json().then(errorData => {
+                        console.error('GitHub API错误详情:', errorData);
+                        return null;
+                    }).catch(() => {
+                        return null;
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) {
+                    console.error('GitHub API返回null数据');
+                    return null;
+                }
+                if (data.content) {
+                    // 解码Base64内容
+                    return `data:image/png;base64,${data.content}`;
+                } else {
+                    console.error('文件内容不存在:', data);
+                    return null;
+                }
+            })
+            .catch(error => {
+                console.error('GitHub API请求失败:', error);
+                return null;
+            });
+        }
+        
+        /**
+         * 查看所有人员
+         */
+        function viewAllPersons() {
+            const modal = document.getElementById('personListModal');
+            const content = document.getElementById('personListContent');
+            
+            // 按部门分组
+            const deptGroups = {};
+            Object.keys(PERSONNEL_MAP).forEach(name => {
+                const dept = PERSONNEL_MAP[name];
+                if (!deptGroups[dept]) {
+                    deptGroups[dept] = [];
+                }
+                deptGroups[dept].push(name);
+            });
+            
+            // 生成HTML内容
+            let html = '<div style="font-size: 14px;">';
+            Object.keys(deptGroups).sort().forEach(dept => {
+                html += `<h5 style="margin-top: 15px; margin-bottom: 5px; color: #007bff;">${dept}</h5>`;
+                html += '<ul style="margin: 0; padding-left: 20px;">';
+                deptGroups[dept].sort((a, b) => a.localeCompare(b, 'zh-CN')).forEach(name => {
+                    html += `<li>${name}</li>`;
+                });
+                html += '</ul>';
+            });
+            html += '</div>';
+            
+            content.innerHTML = html;
+            modal.style.display = 'block';
+        }
+        /**
+         * 页面加载完成后初始化
+         */
+        window.addEventListener('DOMContentLoaded', function() {
+            // 从localStorage恢复数据
+            loadFromLocalStorage();
+            console.log('数据恢复完成，PERSONNEL_MAP大小:', Object.keys(PERSONNEL_MAP).length);
+            console.log('上传的头像数量:', Object.keys(uploadedAvatars).length);
+            
+            initCanvas();
+            initEventListeners();
+            console.log('开始加载字体...');
+            // 等待字体加载完成后再加载图片
+            setTimeout(async function() {
+                console.log('字体加载完成，开始加载图片...');
+                // 使用GitHub API加载6.jpg作为背景（底层）
+                const bgImageUrl = await loadImageFromGitHub('6.jpg');
+                if (bgImageUrl) {
+                    fabric.Image.fromURL(bgImageUrl, function(bgImg) {
+                        // 保存背景图片对象
+                        backgroundImage = bgImg;
+                        // 调整图片大小以适应画布
+                        bgImg.scaleToWidth(canvas.width);
+                        bgImg.scaleToHeight(canvas.height);
+                        // 设置图片不可拖拽移动
+                        bgImg.selectable = false;
+                        bgImg.evented = false;
+                        // 清除画布并添加背景图片
+                        canvas.clear();
+                        canvas.add(bgImg);
+                        // 使用GitHub API加载7.png作为顶层图片
+                        loadImageFromGitHub('7.png').then(topImageUrl => {
+                            if (topImageUrl) {
+                                fabric.Image.fromURL(topImageUrl, function(topImg) {
+                                    // 调整图片大小以适应画布
+                                    topImg.scaleToWidth(canvas.width);
+                                    topImg.scaleToHeight(canvas.height);
+                                    // 设置图片不可拖拽移动
+                                    topImg.selectable = false;
+                                    topImg.evented = false;
+                                    // 添加顶层图片
+                                    canvas.add(topImg);
+                                    // 添加初始文字对象
+                                    addTextObjects();
+                                    // 设置默认值
+                                    document.getElementById('deptContent').value = '销售部';
+                                    document.getElementById('orderContent').value = '开门红套餐下单';
+                                    updateTextObject('dept');
+                                    updateTextObject('order');
+                                    // 渲染画布
+                                    canvas.renderAll();
+                                    console.log('两个默认图片已加载完成');
+                                }, {
+                                    crossOrigin: 'anonymous',
+                                    onError: function(err) {
+                                        console.error('加载顶层图片失败:', err);
+                                    }
+                                });
+                            } else {
+                                console.error('无法获取顶层图片URL');
+                            }
+                        });
+                    }, {
+                        crossOrigin: 'anonymous', // 解决画布污染问题
+                        onError: function(err) {
+                            console.error('加载背景图片失败:', err);
+                        }
+                    });
+                } else {
+                    console.error('无法获取背景图片URL');
+                }
+            }, 1000); // 延迟1秒，确保字体有足够时间加载
+            console.log('PPT图片文字替换工具已加载完成');
+        });
+    </script></body></html>
