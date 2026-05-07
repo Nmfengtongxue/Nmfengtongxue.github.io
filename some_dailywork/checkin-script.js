@@ -47,7 +47,12 @@ const departmentPersonLists = {
   ],
 };
 
-const leavePersons = ["朱英", "孙绿萍"];
+const leavePersons = ["朱英", "孙绿萍", "朱艳丽"];
+
+// 请假原因说明（仅用于「查看名单」展示；未列入者仍显示为「请假」）
+const leavePersonReasonByPerson = {
+  朱艳丽: "生育假",
+};
 
 // 医疗部客服人员：未打卡对比结果与「查看名单」中悬停显示说明
 const medicalDeptCustomerServicePersons = ["苏丹", "张改霞", "李雨婷", "王凯迪"];
@@ -106,6 +111,7 @@ function shouldIncludeInAttendanceStat(personName, selectedDateStr) {
 }
 
 const updateLogs = [
+  "2026-05-07: 医疗部朱艳丽请假（生育假），暂不参与未打卡统计，与朱英、孙绿萍同属请假名单",
   "2026-05-06: 医疗部新增王凯迪（客服人员，鼠标悬停可查看说明）；销售部新增刘晓霞；陈佳佳、卢林博五一后离职，已从名单移除、不再统计",
   "2026-04-29: 销售部新增周东升；五一后陈佳佳、卢林博离职，自 2026-05-06 起不再纳入统计",
   "2026-04-07: 行政部新增李雁程",
@@ -498,7 +504,10 @@ function renderPersonList() {
         li.style.backgroundColor = "#fef3c7";
         li.style.color = "#92400e";
         li.style.textDecoration = "line-through";
-        li.textContent = `${index + 1}. ${person} (请假)`;
+        const leaveReason = leavePersonReasonByPerson[person];
+        li.textContent = leaveReason
+          ? `${index + 1}. ${person} (请假·${leaveReason})`
+          : `${index + 1}. ${person} (请假)`;
       } else if (departNotIncludeAfterByPerson[person]) {
         const departAfter = departNotIncludeAfterByPerson[person];
         // “离职后不参与统计”是按日期生效，这里仅做标注，不做删除/删除线避免误解
@@ -539,7 +548,9 @@ function renderPersonList() {
     const leaveList = document.createElement("p");
     leaveList.style.margin = "0";
     leaveList.style.color = "#92400e";
-    leaveList.textContent = leavePersons.join("、");
+    leaveList.textContent = leavePersons
+      .map((p) => (leavePersonReasonByPerson[p] ? `${p}（${leavePersonReasonByPerson[p]}）` : p))
+      .join("、");
     leaveDiv.appendChild(leaveList);
 
     personListView.insertBefore(leaveDiv, personListView.firstChild);
